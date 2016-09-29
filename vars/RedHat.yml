@@ -1,0 +1,12 @@
+---
+#server
+munin_conf_d_directory: /etc/munin/conf.d
+munin_htmldir: /var/www/html/munin
+munin_includedir: /etc/munin/conf.d
+munin_apache_service: httpd
+apache_log_dir: /var/log/httpd
+munin_apache_dir: /etc/httpd
+munin_nginx_dir: /etc/nginx
+#client
+munin_node_log: /var/log/munin-node/munin-node.log
+munin_node_pid: /var/run/munin/munin-node.pid

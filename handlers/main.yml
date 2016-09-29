@@ -1,0 +1,9 @@
+---
+- name: restart munin-node
+  service: name=munin-node state=restarted
+
+- name: restart apache
+  service: name={{ munin_apache_service }} state=restarted
+
+- name: restart nginx
+  service: name=nginx state=restarted

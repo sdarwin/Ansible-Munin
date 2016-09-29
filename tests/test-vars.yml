@@ -1,0 +1,31 @@
+---
+- hosts: all
+
+  vars:
+    munin_node_plugins:
+      - name: uptime
+      - name: if_eth1
+        plugin: if_
+
+    munin_node_config: {
+       "ps_test": {
+         "env.regex": "bash",
+         "env.name": "bash"
+       }
+    }
+
+  pre_tasks:
+    - name: Update apt cache.
+      apt: update_cache=yes
+      when: ansible_os_family == 'Debian'
+
+    - name: Install test dependencies (Debian).
+      package: name=netcat state=present
+      when: ansible_os_family == 'Debian'
+
+    - name: Install test dependencies (RedHat).
+      package: name=nc state=present
+      when: ansible_os_family == 'RedHat'
+
+  roles:
+    - role_under_test

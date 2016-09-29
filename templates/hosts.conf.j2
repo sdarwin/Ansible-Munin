@@ -1,0 +1,23 @@
+# Munin hosts.
+
+#from inventory
+{% for host in groups['all'] %}
+{% if host not in munin_hosts_ignore %}
+[{{ host }}]
+    address {{ host }}
+{% endif %}
+{% endfor %}
+
+#from file
+{% for host in munin_hosts %}
+{% if host.name not in munin_hosts_ignore %}
+[{{ host.name }}]
+    address {{ host.address }}
+{% if host.extra is defined %}
+{% for extra in host.extra %}
+    {{ extra }}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% endfor %}
+

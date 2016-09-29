@@ -1,0 +1,55 @@
+---
+- name: stop apache
+  service: name="{{ munin_apache_service }}" state=stopped enabled=no
+  ignore_errors: yes
+
+- name: install the nginx package
+  package: name=nginx state=present 
+
+- name: create nginx sites-available
+  file:
+    path: "{{ munin_nginx_dir }}/sites-available"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: create nginx sites-enabled
+  file:
+    path: "{{ munin_nginx_dir }}/sites-enabled"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: enable nginx sites-enabled
+  lineinfile: dest="{{ munin_nginx_dir }}/nginx.conf" insertafter="^.*include /etc/nginx/conf.d/\*\.conf;" line="    include /etc/nginx/sites-enabled/*;" 
+  when: ansible_os_family == 'RedHat'
+
+- name: enable the nginx service
+  service: name=nginx enabled=yes
+
+- name: nginx vhost template
+  template:
+    src: nginx.conf.j2
+    dest: "{{ munin_nginx_dir }}/sites-available/munin.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart nginx
+
+- name: nginx dissite default
+  file: path=/etc/nginx/sites-enabled/default state=absent
+  notify: restart nginx
+
+- name: nginx dissite 000-default
+  file: path=/etc/nginx/sites-enabled/000-default state=absent
+  notify: restart nginx
+
+- name: ensite munin
+  file: src=/etc/nginx/sites-available/munin.conf dest=/etc/nginx/sites-enabled/munin.conf state=link
+  notify: restart nginx
+
+- name: start nginx
+  service: name=nginx state=started
+

@@ -1,0 +1,111 @@
+---
+#server
+munin_web_server_port: 80
+munin_web_server: apache2
+munin_sysadmin_email: ops@example.com
+munin_public_domain: munin.example.com
+#choices are htpasswd, open, or openid.  
+#htpasswd:  a passwords file
+#open: no security
+#openid. TBD. not supported yet.
+munin_server_auth_method: htpasswd
+apache_allowed_openids:
+apache_mod_auth_openid_dblocation:
+nginx_log_dir: /var/log/nginx
+munin_apache_service: apache2
+munin_apache_dir: /etc/apache2
+munin_nginx_dir: /etc/nginx
+munin_admins_group: 'sysadmin'
+
+munin_packages:
+  - python-passlib
+  - munin
+
+munin_basedir: /etc/munin
+munin_conf_d_directory: /etc/munin/conf.d
+
+munin_dbdir: /var/lib/munin
+munin_htmldir: /var/www/html/munin
+munin_logdir: /var/log/munin
+munin_rundir: /var/run/munin
+
+munin_includedir: /etc/munin/conf.d
+
+munin_html_strategy: cron
+munin_graph_strategy: cron
+munin_cron_job: present
+
+munin_max_processes: 12
+
+# This is a list of users allowed to login to the nagios web frontend
+munin_users:
+  - user: muninadmin
+    pass: Password1change
+
+# Will be translated into:
+# [host]
+#   address: [name]
+#   [extra.0]
+#   [extra.1]
+#   [...]
+#
+# Note that `name` can be hostname, or group + hostname, for example:
+# [example.com;foo.example.com]
+munin_hosts:
+  - {
+    name: "localhost",
+    address: "127.0.0.1",
+    extra: ["use_node_name yes"]
+  }
+  #- {
+  #  name: "test2",
+  #  address: "1.2.3.4",
+  #}
+
+munin_hosts_ignore: []
+  #- test2
+
+munin_alerts: []
+#  - {
+#    name: "JohnDoe",
+#    email: "johndoe@example.com",
+#    subject: "Munin-notification for ${var:group} :: ${var:host}",
+#    level: "warning critical"
+#   }
+
+#client
+munin_node_bind_host: "*"
+munin_node_bind_port: "4949"
+
+munin_node_host_name: ''
+
+# Munin requires IPs be added as regular expressions.
+munin_node_allowed_ips:
+  - '^127\.0\.0\.1$'
+  - '^::1$'
+
+# Source and destination of munin plugins.
+munin_plugin_src_path: /usr/share/munin/plugins/
+munin_plugin_dest_path: /etc/munin/plugins/
+
+# List of munin plugins to enable.
+munin_node_plugins: []
+  # - name: uptime
+  # - name: if_eth0
+  #   plugin: if_
+  # - name: ps_test
+  #   plugin: ps_
+
+# Plugin configuration options (the key is the plugin heading, items in the
+# array will be options for the plugin).
+munin_node_config: {
+  # "ps_test": {
+  #   "env.regex": "bash",
+  #   "env.name": "bash"
+  # }
+}
+
+epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
+epel_repo_gpg_key_url: "/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
+epel_repofile_path: "/etc/yum.repos.d/epel.repo"
+

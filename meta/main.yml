@@ -1,0 +1,22 @@
+---
+dependencies: []
+
+galaxy_info:
+  author: sdarwin
+  description: Munin Server and Munin Client for RedHat/CentOS or Debian/Ubuntu.
+  license: "license (BSD, MIT)"
+  min_ansible_version: 1.9
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  - name: Ubuntu
+    versions:
+    - trusty
+    - xenial
+  - name: Debian
+    versions:
+    - jessie
+    - wheezy
+  galaxy_tags:
+    - monitoring
