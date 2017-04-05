@@ -44,7 +44,7 @@ host_name {{ munin_node_host_name }}
 {% for allowed_ip in munin_node_allowed_ips %}
 allow {{ allowed_ip }}
 {% endfor %}
-{% for host in groups['monitoring-servers'] %}
+{% for host in groups[munin_monitoring_servers_group_name] %}
 {% for ip in hostvars[host]['ansible_all_ipv4_addresses'] %}
 allow ^{{ ip | regex_replace('\.', '\.') }}$
 {% endfor %}

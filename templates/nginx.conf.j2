@@ -14,13 +14,13 @@ server {
   location / {
     #auth_basic "Munin Server";
     #auth_basic_user_file {{ munin_basedir }}/htpasswd.users;
-    root {{ munin_htmldir }};
+    root {{ munin_htmlrootdir }};
   }
 {% else %}
   location / {
     auth_basic "Munin Server";
     auth_basic_user_file {{ munin_basedir }}/htpasswd.users;
-    root {{ munin_htmldir }};
+    root {{ munin_htmlrootdir }};
   }
 {% endif %}
 

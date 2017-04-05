@@ -26,6 +26,9 @@ munin_conf_d_directory: /etc/munin/conf.d
 
 munin_dbdir: /var/lib/munin
 munin_htmldir: /var/www/html/munin
+#munin_htmlrootdir is an optional feature. Host an alternative page on the root / webpage, with munin_htmlrootdir.
+#Then you should direct the user to visit /munin, which is the munin installation, and located at munin_htmldir.
+munin_htmlrootdir: /var/www/html/munin
 munin_logdir: /var/log/munin
 munin_rundir: /var/run/munin
 
@@ -108,4 +111,7 @@ munin_node_config: {
 epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
 epel_repo_gpg_key_url: "/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
 epel_repofile_path: "/etc/yum.repos.d/epel.repo"
+
+#Probably leave this as-is. It should match your top-level ansible playbook, such as "- hosts: monitoring-servers"
+munin_monitoring_servers_group_name: "monitoring-servers"
 

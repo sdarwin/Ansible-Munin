@@ -5,7 +5,7 @@
   ServerName    {{ ansible_fqdn }}
   ServerAlias   munin {{ munin_public_domain }}
   Alias         /munin {{ munin_htmldir }}
-  DocumentRoot  {{ munin_htmldir }}
+  DocumentRoot  {{ munin_htmlrootdir }}
   CustomLog     {{ apache_log_dir }}/munin_access.log combined
   ErrorLog      {{ apache_log_dir }}/munin_error.log
 
