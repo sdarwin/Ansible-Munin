@@ -80,6 +80,7 @@ munin_alerts: []
 munin_node_bind_host: "*"
 munin_node_bind_port: "4949"
 
+#Not recommended to customize this. Server and client need to correspond. The templates are using inventory_hostname.
 munin_node_host_name: ''
 
 # Munin requires IPs be added as regular expressions.

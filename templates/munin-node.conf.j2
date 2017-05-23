@@ -34,6 +34,8 @@ ignore_file \.pod$
 # telnetting to localhost, port 4949
 {% if munin_node_host_name %}
 host_name {{ munin_node_host_name }}
+{% else %}
+host_name {{ inventory_hostname }}
 {% endif %}
 
 # A list of addresses that are allowed to connect.  This must be a
