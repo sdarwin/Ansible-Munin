@@ -1,6 +1,6 @@
 # Ansible Role: Munin
 
-Installs munin, a monitoring system, on RedHat/CentOS or Debian/Ubuntu Linux servers.
+Installs munin, a monitoring system, on RedHat/CentOS or Debian/Ubuntu Linux servers.  
 
 This role will install both munin and munin-node (client and server), as well as configure Munin automatically based on Ansible's existing inventory of hosts. The goal is to have a complete Munin monitoring system in a single Ansible role, and without too much manual configuration required.
 
@@ -127,4 +127,6 @@ MIT / BSD
 ## Author Information
 
 By Sam Darwin, 2016. Based on pre-existing roles, see ACKNOWLEDGEMENTS.md file.  Feedback and bug reports welcome.
+
+[![Analytics](https://ga-beacon.appspot.com/UA-112361697-1/Ansible-Munin)](https://github.com/igrigorik/ga-beacon)
 
