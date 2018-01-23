@@ -24,11 +24,11 @@
   when: ansible_os_family == 'RedHat' and not epel_repofile_result.stat.exists 
 
 - name: Ensure munin-node is installed (RedHat).
-  yum: name=munin-node state=installed enablerepo=epel
+  yum: name=munin-node state=present enablerepo=epel
   when: ansible_os_family == 'RedHat'
 
 - name: Ensure munin-node is installed (Debian).
-  apt: name=munin-node state=installed
+  apt: name=munin-node state=present
   when: ansible_os_family == 'Debian'
 
 - name: Copy munin-node configuration.

@@ -28,6 +28,8 @@ munin_dbdir: /var/lib/munin
 munin_htmldir: /var/www/html/munin
 #munin_htmlrootdir is an optional feature. Host an alternative page on the root / webpage, with munin_htmlrootdir.
 #Then you should direct the user to visit /munin, which is the munin installation, and located at munin_htmldir.
+#For example, set munin_htmlrootdir: /var/www/html 
+#and then create a customized /var/www/html/index.html page.
 munin_htmlrootdir: /var/www/html/munin
 munin_logdir: /var/log/munin
 munin_rundir: /var/run/munin

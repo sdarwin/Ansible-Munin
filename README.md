@@ -14,7 +14,7 @@ All the variables in defaults/main.yml may be overridden or changed.
 
 ### Server Configuration 
 
-In the ansible inventory, place the munin server (or even multiple munin servers) in the group monitoring-servers.  Then run this role on those servers by specifying "- hosts: monitoring-servers" and the variable "run_munin_server: true" in the playbook.  See the example playbook main.yml in this directory. 
+In the ansible inventory, place the munin server (or even multiple munin servers) in the group monitoring-servers.  Then run this role on those servers by specifying "- hosts: monitoring-servers" and the variable "run_munin_server: true" in the playbook.  See the example playbook default.yml in this directory. 
 
 ### Munin Monitored Hosts:
 

@@ -8,7 +8,8 @@ env:
   # Test general usage. 
   - distro: debian8
     init: /lib/systemd/systemd
-    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    run_opts: >
+     "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
     ansible_vars: >
      '{"run_munin_client": true, "groups": { "monitoring-servers": "localhost" }}'
     playbook: test.yml
@@ -26,7 +27,8 @@ env:
     playbook: test.yml
   - distro: ubuntu1604
     init: /lib/systemd/systemd
-    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    run_opts: > 
+     '--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro'
     ansible_vars: >
      '{"run_munin_client": true, "groups": { "monitoring-servers": "localhost" }}'
     playbook: test.yml
