@@ -2,6 +2,7 @@
 #server
 munin_conf_d_directory: /etc/munin/munin-conf.d
 munin_htmldir: /var/cache/munin/www
+default_munin_htmlrootdir: /var/cache/munin/www
 munin_includedir: /etc/munin/munin-conf.d
 munin_apache_service: apache2
 munin_apache_dir: /etc/apache2

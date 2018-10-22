@@ -31,16 +31,19 @@
 
 - name: enabled mod_rewrite
   apache2_module: name=rewrite state=present
+  when: ansible_os_family == 'Debian'
   notify:
     - restart apache
 
 - name: enabled mod_cgid for dynazoom
   apache2_module: name=cgid state=present
+  when: ansible_os_family == 'Debian'
   notify:
     - restart apache
 
 - name: enabled mod_cgi for dynazoom
   apache2_module: name=cgi state=present
+  when: ansible_os_family == 'Debian'
   notify:
     - restart apache
   ignore_errors: yes
@@ -51,10 +54,11 @@
   notify:
     - restart apache
 
-- name: fix permissions for dynazoom
-  command: chown apache.munin /var/log/munin
-  when: ansible_os_family == 'Redhat'
-  changed_when: false
+#From 2016. Let's comment out for now.
+#- name: fix permissions for dynazoom
+#  command: chown apache.munin /var/log/munin
+#  when: ansible_os_family == 'RedHat'
+#  changed_when: false
 
 #openid stub code
 #- name: Install openid
@@ -75,13 +79,19 @@
 - name: Debian7 apache munin config symlink
   file: src="{{ munin_basedir }}/apache24.conf" dest="{{ munin_apache_dir }}/conf.d/munin.conf" state=link
   notify: restart apache
-  when: ansible_distribution == 'Debian' and ansible_lsb.major_release|int <= 7
+  when:
+    - ansible_distribution == 'Debian'
+    - ansible_distribution_major_version|int <= 7
+    #- ansible_lsb.major_release|int <= 7
 
 #only Debian7
 - name: check release version
   set_fact:
     Debian7: True
-  when: ansible_distribution == 'Debian' and ansible_lsb.major_release|int <= 7
+  when:
+    - ansible_distribution == 'Debian'
+    - ansible_distribution_major_version|int <= 7
+    #- ansible_lsb.major_release|int <= 7
 
 - name: apache24 munin config symlink
   file: src="{{ munin_basedir }}/apache24.conf" dest="{{ munin_apache_dir }}/conf-available/munin.conf" state=link
@@ -92,6 +102,32 @@
   file: src="{{ munin_apache_dir }}/conf-available/munin.conf" dest="{{ munin_apache_dir }}/conf-enabled/munin.conf" state=link
   notify: restart apache
   when: ansible_os_family == 'Debian' and Debian7 is not defined
+
+- name: apache24 centos7 config file for dynazoom
+  template:
+    src: apache24centos7.conf.j2
+    dest: "{{ munin_apache_dir }}/conf.d/munin.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart apache
+  when:
+    - ansible_os_family == 'RedHat'
+
+- name: Adding user apache to munin group for dynazoom
+  user: name=apache
+    group=apache
+    groups=munin
+    append=yes
+  when:
+    - ansible_os_family == 'RedHat'
+
+# Put SELinux in permissive mode, logging actions that would be blocked, to fix dynazoom.
+- selinux:
+    policy: targeted
+    state: permissive
+  when: ansible_os_family == "RedHat"
+  ignore_errors: yes
 
 - name: apache vhost template
   template:

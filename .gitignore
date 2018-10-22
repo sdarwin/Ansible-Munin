@@ -1,2 +1,4 @@
 /*.retry
+.kitchen
+/bcks
 

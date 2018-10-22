@@ -1,0 +1,6 @@
+ScriptAlias /munin-cgi/munin-cgi-graph /var/www/html/munin/cgi/munin-cgi-graph
+<Location /munin-cgi/munin-cgi-graph>
+  # Fix to make dynazoom works
+  Options ExecCGI
+  SetHandler cgi-script
+</Location>

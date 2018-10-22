@@ -8,127 +8,57 @@ env:
   # Test general usage. 
   - distro: debian8
     init: /lib/systemd/systemd
-    run_opts: >
-     "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    ansible_vars: >
-     '{"run_munin_client": true, "groups": { "monitoring-servers": "localhost" }}'
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    playbook: test.yml
+  - distro: debian9
+    init: /lib/systemd/systemd
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
     playbook: test.yml
   - distro: centos7
     init: /usr/lib/systemd/systemd
     run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    ansible_vars: >
-     '{"run_munin_client": true, "groups": { "monitoring-servers": "localhost" }}'
     playbook: test.yml
-  - distro: ubuntu1404
-    init: /sbin/init
-    run_opts: ""
-    ansible_vars: >
-     '{"run_munin_client": true, "groups": { "monitoring-servers": "localhost" }}'
-    playbook: test.yml
-  - distro: ubuntu1604
+    #- distro: trusty
+    #init: /sbin/init
+    #run_opts: "--privileged"
+    #playbook: test.yml
+  - distro: xenial
     init: /lib/systemd/systemd
-    run_opts: > 
-     '--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro'
-    ansible_vars: >
-     '{"run_munin_client": true, "groups": { "monitoring-servers": "localhost" }}'
+    run_opts: '--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro'
     playbook: test.yml
-
-  # Test different options.
-  - distro: centos7
-    init: /usr/lib/systemd/systemd
-    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    ansible_vars: >
-     '{"run_munin_client": true, "groups": { "monitoring-servers": "localhost" }}'
-    playbook: test-vars.yml
-  - distro: debian8
-    init: /lib/systemd/systemd
-    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    ansible_vars: >
-     '{"run_munin_client": true, "groups": { "monitoring-servers": "localhost" }}'
-    playbook: test-vars.yml
-  - distro: ubuntu1404
-    init: /sbin/init
-    run_opts: ""
-    ansible_vars: >
-     '{"run_munin_client": true, "groups": { "monitoring-servers": "localhost" }}'
-    playbook: test-vars.yml
-  - distro: ubuntu1604
-    init: /lib/systemd/systemd
-    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    ansible_vars: >
-     '{"run_munin_client": true, "groups": { "monitoring-servers": "localhost" }}'
-    playbook: test-vars.yml
-
-  # MUNIN SERVER
-  # Test general usage.
-  - distro: centos7
-    init: /usr/lib/systemd/systemd
-    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    ansible_vars: >
-     '{"run_munin_server": true, "groups": { "monitoring-servers": "localhost" }}'
-    playbook: test.yml
-  - distro: debian8
-    init: /lib/systemd/systemd
-    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    ansible_vars: >
-     '{"run_munin_server": true, "groups": { "monitoring-servers": "localhost" }}'
-    playbook: test.yml
-  - distro: ubuntu1404
-    init: /sbin/init
-    run_opts: ""
-    ansible_vars: >
-     '{"run_munin_server": true, "groups": { "monitoring-servers": "localhost" }}'
-    playbook: test.yml
-  - distro: ubuntu1604
-    init: /sbin/init
-    run_opts: ""
-    ansible_vars: >
-     '{"run_munin_server": true, "groups": { "monitoring-servers": "localhost" }}'
-    playbook: test.yml
-
-  # Test different options.
-  - distro: centos7
-    init: /usr/lib/systemd/systemd
-    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    ansible_vars: >
-     '{"run_munin_server": true, "groups": { "monitoring-servers": "localhost" }}'
-    playbook: test-vars.yml
-  - distro: debian8
-    init: /lib/systemd/systemd
-    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    ansible_vars: >
-     '{"run_munin_server": true, "groups": { "monitoring-servers": "localhost" }}'
-    playbook: test-vars.yml
-  - distro: ubuntu1404
-    init: /sbin/init
-    run_opts: ""
-    ansible_vars: >
-     '{"run_munin_server": true, "groups": { "monitoring-servers": "localhost" }}'
-    playbook: test-vars.yml
-  - distro: ubuntu1604
-    init: /lib/systemd/systemd
-    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    ansible_vars: >
-     '{"run_munin_server": true, "groups": { "monitoring-servers": "localhost" }}'
-    playbook: test-vars.yml
+    #- distro: bionic
+    #init: /lib/systemd/systemd
+    #run_opts: '--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro'
+    #playbook: test.yml
 
 services:
   - docker
 
 before_install:
   # Pull container.
-  - 'sudo docker pull sdarwin/docker-${distro}-ansible:latest'
+  - 'sudo docker pull sdarwin/${distro}-ansible:latest'
 
 script:
   - container_id=$(mktemp)
   # Run container in detached state.
-  - 'sudo docker run --detach --volume="${PWD}":/etc/ansible/roles/role_under_test:ro ${run_opts} sdarwin/docker-${distro}-ansible:latest "${init}" > "${container_id}"'
+  - 'sudo docker run --add-host munin.example.com:127.0.1.1 --detach --volume="${PWD}":/etc/ansible/roles/role_under_test:ro ${run_opts} sdarwin/${distro}-ansible:latest "${init}" > "${container_id}"'
+
+  # add ansible hosts
+  - 'docker exec --tty "$(cat ${container_id})" env TERM=xterm /bin/bash -c ''echo -e "\n[monitoring-servers]\nlocalhost ansible_connection=local\n" > /etc/ansible/hosts '' '
+  # check ansible hosts
+  - 'docker exec --tty "$(cat ${container_id})" env TERM=xterm /bin/bash -c ''cat /etc/ansible/hosts '' '
+
+  # upgrade pip
+  - 'docker exec --tty "$(cat ${container_id})" env TERM=xterm pip install --upgrade pip'
+  
+  # upgrade ansible
+  - 'docker exec --tty "$(cat ${container_id})" env TERM=xterm pip install ansible==2.5.9'
 
   # Ansible syntax check.
   - 'sudo docker exec --tty "$(cat ${container_id})" env TERM=xterm ansible-playbook --extra-vars ''${ansible_vars}'' /etc/ansible/roles/role_under_test/tests/${playbook} --syntax-check'
 
   # Test role.
-  - 'sudo docker exec --tty "$(cat ${container_id})" env TERM=xterm ansible-playbook --extra-vars ''${ansible_vars}'' /etc/ansible/roles/role_under_test/tests/${playbook}'
+  - 'sudo docker exec --tty "$(cat ${container_id})" env TERM=xterm ansible-playbook  --extra-vars ''${ansible_vars}'' /etc/ansible/roles/role_under_test/tests/${playbook}'
 
   # Test role idempotence.
   - idempotence=$(mktemp)
@@ -141,10 +71,15 @@ script:
 
   # Check if munin is responding on port 4949.
   # TODO
+  
+  #Check website
+  #Munin doesn't output html pages for a couple of cycles. Maybe 5 or 10 minutes. A curl or wget will not work.
+  #- 'docker exec "$(cat ${container_id})" env TERM=xterm env ANSIBLE_FORCE_COLOR=1 wget --user muninadmin --password Password1change --no-check-certificate --header=''Host: munin.example.com'' -O - -o /dev/null http://munin.example.com/munin/ | grep ''Categories'' '
 
 after_success:
   # Clean up.
   - 'sudo docker stop "$(cat ${container_id})"'
 
-notifications:
-  webhooks: https://galaxy.ansible.com/api/v1/notifications/
+#notifications:
+#  webhooks: https://galaxy.ansible.com/api/v1/notifications/
+

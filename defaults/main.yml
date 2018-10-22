@@ -19,7 +19,10 @@ munin_admins_group: 'sysadmin'
 
 munin_packages:
   - python-passlib
-  - munin
+  - munin  
+  - tree
+  - htop
+  - wget
 
 munin_basedir: /etc/munin
 munin_conf_d_directory: /etc/munin/conf.d
@@ -30,7 +33,7 @@ munin_htmldir: /var/www/html/munin
 #Then you should direct the user to visit /munin, which is the munin installation, and located at munin_htmldir.
 #For example, set munin_htmlrootdir: /var/www/html 
 #and then create a customized /var/www/html/index.html page.
-munin_htmlrootdir: /var/www/html/munin
+#munin_htmlrootdir: /var/www/html/munin
 munin_logdir: /var/log/munin
 munin_rundir: /var/run/munin
 

@@ -1,18 +1,40 @@
 ---
 - hosts: all
-
   pre_tasks:
     - name: Update apt cache.
       apt: update_cache=yes
       when: ansible_os_family == 'Debian'
+      changed_when: false
 
     - name: Install test dependencies (Debian).
-      package: name=netcat state=present
+      apt:
+        name: 
+          - netcat
+          - iproute2
+          - curl
       when: ansible_os_family == 'Debian'
 
     - name: Install test dependencies (RedHat).
-      package: name=nc state=present
+      yum:
+        name:
+        - nc
+        - curl
       when: ansible_os_family == 'RedHat'
 
+    - name: gather facts
+      setup:
+
+    - name: debug variables
+      debug:
+        msg: "ansible_all_ipv4_addresses is {{ansible_all_ipv4_addresses}} and ansible_all_ipv6_addresses is {{ansible_all_ipv6_addresses}}"
+
+- hosts: monitoring-servers
+  become: true
   roles:
-    - role_under_test
+    - { role: 'role_under_test', run_munin_server: true }
+
+- hosts: all
+  become: true
+  roles:
+   - { role: 'role_under_test', run_munin_client: true }
+
