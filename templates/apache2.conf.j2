@@ -9,6 +9,12 @@
   CustomLog     {{ apache_log_dir }}/munin_access.log combined
   ErrorLog      {{ apache_log_dir }}/munin_error.log
 
+{% if munin_https == 'enabled' %}
+  RewriteEngine On 
+  RewriteCond %{HTTPS}  !=on 
+  RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L] 
+{% endif %}
+
 {% if munin_server_auth_method == 'openid' %}
   <Location />
     AuthName "Munin Server"
@@ -35,3 +41,48 @@
   RewriteRule ^(.*)index\.html$ $1 [R=301,L]
 </VirtualHost>
 
+{% if munin_https == 'enabled' %}
+<IfModule mod_ssl.c>
+        <VirtualHost _default_:443>
+  		ServerAdmin   {{ munin_sysadmin_email }}
+  		ServerName    {{ ansible_fqdn }}
+  		ServerAlias   munin {{ munin_public_domain }}
+  		Alias         /munin {{ munin_htmldir }}
+  		DocumentRoot  {{ munin_htmlrootdir }}
+  		CustomLog     {{ apache_log_dir }}/munin_access.log combined
+  		ErrorLog      {{ apache_log_dir }}/munin_error.log
+                SSLEngine on
+                SSLCertificateFile  {{ munin_ssl_cert }}
+                SSLCertificateKeyFile {{ munin_ssl_key }}
+                <FilesMatch "\.(cgi|shtml|phtml|php)$">
+                                SSLOptions +StdEnvVars
+                </FilesMatch>
+                <Directory /usr/lib/cgi-bin>
+                                SSLOptions +StdEnvVars
+                </Directory>
+{% if munin_server_auth_method == 'openid' %}
+		  <Location />
+		    AuthName "Munin Server"
+		    AuthType OpenID
+		    require user {{ apache_allowed_openids | join(' ') }}
+		    AuthOpenIDDBLocation {{ apache_mod_auth_openid_dblocation }}
+		  </Location>
+{% elif munin_server_auth_method ==  'open' %}
+		  <Location />
+		    AuthType None
+		    Require all granted
+		  </Location>
+{% else %}
+		  <Location />
+		    AuthName "Munin Server"
+		    AuthType Basic
+		    AuthUserFile "{{ munin_basedir }}/htpasswd.users"
+		    require valid-user
+		  </Location>
+{% endif %}
+		  RewriteEngine On
+		  RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /.*index\.html\ HTTP/
+		  RewriteRule ^(.*)index\.html$ $1 [R=301,L]
+        </VirtualHost>
+</IfModule>
+{% endif %}

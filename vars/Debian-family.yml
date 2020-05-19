@@ -8,6 +8,14 @@ munin_apache_service: apache2
 munin_apache_dir: /etc/apache2
 munin_nginx_dir: /etc/nginx 
 apache_log_dir: /var/log/apache2
+munin_packages:
+  - python-passlib
+  - munin
+  - tree
+  - htop
+  - wget
+  - ssl-cert
 #client
 munin_node_log: /var/log/munin/munin-node.log
 munin_node_pid: /var/run/munin/munin-node.pid
+munin_web_user: www-data

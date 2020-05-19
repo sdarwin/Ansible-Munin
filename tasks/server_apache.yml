@@ -29,6 +29,14 @@
 - name: enable apache
   service: name={{munin_apache_service}} enabled=yes
 
+- name: enabled mod_ssl
+  apache2_module: name=ssl state=present
+  when:
+    - ansible_os_family == 'Debian'
+    - munin_https == 'enabled'
+  notify:
+    - restart apache
+
 - name: enabled mod_rewrite
   apache2_module: name=rewrite state=present
   when: ansible_os_family == 'Debian'

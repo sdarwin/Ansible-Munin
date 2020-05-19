@@ -39,6 +39,22 @@
   include: "server_nginx.yml"
   when: munin_web_server == "nginx"
 
+- name: create cert (Redhat)
+  shell: /etc/ssl/certs/make-dummy-cert {{ munin_ssl_cert }} ; chmod 640 {{ munin_ssl_cert }} ; chgrp {{ munin_web_user }} {{ munin_ssl_cert }}
+  args:
+    creates: "{{ munin_ssl_cert }}"
+  when:
+    - ansible_os_family == "RedHat"
+    - munin_https == "enabled"
+
+- name: create key (Redhat)
+  shell: mkdir -p /etc/ssl/private ; cp -p {{ munin_ssl_cert }} {{ munin_ssl_key }} # noqa 302
+  args:
+    creates: "{{ munin_ssl_key }}"
+  when:
+    - ansible_os_family == "RedHat" # noqa 302
+    - munin_https == "enabled"
+
 - name: Copy munin configurations.
   template:
     src: "{{ item.src }}"

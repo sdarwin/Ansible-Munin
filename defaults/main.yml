@@ -17,13 +17,6 @@ munin_apache_dir: /etc/apache2
 munin_nginx_dir: /etc/nginx
 munin_admins_group: 'sysadmin'
 
-munin_packages:
-  - python-passlib
-  - munin  
-  - tree
-  - htop
-  - wget
-
 munin_basedir: /etc/munin
 munin_conf_d_directory: /etc/munin/conf.d
 
@@ -121,3 +114,6 @@ epel_repofile_path: "/etc/yum.repos.d/epel.repo"
 #Probably leave this as-is. It should match your top-level ansible playbook, such as "- hosts: monitoring-servers"
 munin_monitoring_servers_group_name: "monitoring-servers"
 
+munin_https: enabled
+munin_ssl_cert: /etc/ssl/certs/ssl-cert-snakeoil.pem
+munin_ssl_key: /etc/ssl/private/ssl-cert-snakeoil.key
