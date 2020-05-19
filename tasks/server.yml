@@ -31,14 +31,6 @@
   apt: "name={{ munin_packages }} state=present"
   when: ansible_os_family == 'Debian'
 
-- name: Install apache
-  include: "server_apache.yml"
-  when: munin_web_server == "apache2"
-
-- name: Install nginx
-  include: "server_nginx.yml"
-  when: munin_web_server == "nginx"
-
 - name: create cert (Redhat)
   shell: /etc/ssl/certs/make-dummy-cert {{ munin_ssl_cert }} ; chmod 640 {{ munin_ssl_cert }} ; chgrp {{ munin_web_user }} {{ munin_ssl_cert }}
   args:
@@ -54,6 +46,14 @@
   when:
     - ansible_os_family == "RedHat" # noqa 302
     - munin_https == "enabled"
+
+- name: Install apache
+  include: "server_apache.yml"
+  when: munin_web_server == "apache2"
+
+- name: Install nginx
+  include: "server_nginx.yml"
+  when: munin_web_server == "nginx"
 
 - name: Copy munin configurations.
   template:
