@@ -15,13 +15,13 @@
   until: '"failed" not in result'
   retries: 5
   delay: 10
-  when: ansible_os_family == 'RedHat' and not epel_repofile_result.stat.exists 
+  when: ansible_os_family == 'RedHat' and not epel_repofile_result.stat.exists
 
 - name: Import EPEL GPG key.
   rpm_key:
     key: "{{ epel_repo_gpg_key_url }}"
     state: present
-  when: ansible_os_family == 'RedHat' and not epel_repofile_result.stat.exists 
+  when: ansible_os_family == 'RedHat' and not epel_repofile_result.stat.exists
 
 - name: Ensure munin-node is installed (RedHat).
   yum: name=munin-node state=present enablerepo=epel

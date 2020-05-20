@@ -17,10 +17,10 @@
 ##########
 
 - name: include client
-  include: client.yml 
-  when: run_munin_client is defined 
+  include: client.yml
+  when: run_munin_client is defined
 
 
 - name: include server
-  include: server.yml 
-  when: run_munin_server is defined 
+  include: server.yml
+  when: run_munin_server is defined

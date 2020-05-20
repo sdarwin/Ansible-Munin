@@ -8,7 +8,7 @@
 
     - name: Install test dependencies (Debian).
       apt:
-        name: 
+        name:
           - netcat
           - iproute2
           - curl
@@ -26,7 +26,7 @@
 
     - name: debug variables
       debug:
-        msg: "ansible_all_ipv4_addresses is {{ansible_all_ipv4_addresses}} and ansible_all_ipv6_addresses is {{ansible_all_ipv6_addresses}}"
+        msg: "ansible_all_ipv4_addresses is {{ ansible_all_ipv4_addresses }} and ansible_all_ipv6_addresses is {{ ansible_all_ipv6_addresses }}"
 
 - hosts: monitoring-servers
   become: true
@@ -37,4 +37,3 @@
   become: true
   roles:
    - { role: 'role_under_test', run_munin_client: true }
-

@@ -1,10 +1,9 @@
-
 - name: stop nginx
   service: name=nginx state=stopped enabled=no
   ignore_errors: yes
 
 - name: install the apache package
-  package: name={{munin_apache_service}} state=present
+  package: name={{ munin_apache_service }} state=present
 
 - name: create apache sites-available
   file:
@@ -27,7 +26,7 @@
   when: ansible_os_family == 'RedHat'
 
 - name: enable apache
-  service: name={{munin_apache_service}} enabled=yes
+  service: name={{ munin_apache_service }} enabled=yes
 
 - name: enabled mod_ssl
   apache2_module: name=ssl state=present
@@ -131,7 +130,8 @@
     - ansible_os_family == 'RedHat'
 
 # Put SELinux in permissive mode, logging actions that would be blocked, to fix dynazoom.
-- selinux:
+- name: selinux permissive
+  selinux:
     policy: targeted
     state: permissive
   when: ansible_os_family == "RedHat"
@@ -159,5 +159,4 @@
   notify: restart apache
 
 - name: start apache
-  service: name={{munin_apache_service}} state=started
-
+  service: name={{ munin_apache_service }} state=started

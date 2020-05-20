@@ -4,7 +4,7 @@
   ignore_errors: yes
 
 - name: install the nginx package
-  package: name=nginx state=present 
+  package: name=nginx state=present
 
 - name: create nginx sites-available
   file:
@@ -23,7 +23,7 @@
     mode: 0755
 
 - name: enable nginx sites-enabled
-  lineinfile: dest="{{ munin_nginx_dir }}/nginx.conf" insertafter="^.*include /etc/nginx/conf.d/\*\.conf;" line="    include /etc/nginx/sites-enabled/*;" 
+  lineinfile: dest="{{ munin_nginx_dir }}/nginx.conf" insertafter="^.*include /etc/nginx/conf.d/\*\.conf;" line="    include /etc/nginx/sites-enabled/*;"
   when: ansible_os_family == 'RedHat'
 
 - name: enable the nginx service
@@ -52,4 +52,3 @@
 
 - name: start nginx
   service: name=nginx state=started
-
