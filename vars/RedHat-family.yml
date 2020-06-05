@@ -15,7 +15,9 @@ munin_packages:
   - htop
   - wget
   - mod_ssl
+  - net-tools
 #client
 munin_node_log: /var/log/munin-node/munin-node.log
 munin_node_pid: /var/run/munin/munin-node.pid
 munin_web_user: apache
+make_dummy_cert_path: /etc/ssl/certs/make-dummy-cert

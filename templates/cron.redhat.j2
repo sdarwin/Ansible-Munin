@@ -1,0 +1,8 @@
+# Collect Munin data every five minutes, clean up once a day
+
+MAILTO=root
+
+*/5 * * * *     munin test -x /usr/bin/munin-cron && /usr/bin/munin-cron
+21  5 * * *  root   /usr/sbin/tmpwatch --ctime 24h /var/lib/munin/cgi-tmp
+25  5 * * *  root   /usr/sbin/tmpwatch --ctime 30d /var/lib/munin --exclude /var/lib/munin/.ssh --exclude /var/lib/munin/cgi-tmp --exclude /var/lib/munin/plugin-state --exclude /var/lib/munin/rrdcached
+

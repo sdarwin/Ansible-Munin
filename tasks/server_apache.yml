@@ -1,3 +1,12 @@
+
+# Put SELinux in permissive mode, logging actions that would be blocked, to fix dynazoom.
+- name: selinux permissive
+  selinux:
+    policy: targeted
+    state: permissive
+  when: ansible_os_family == "RedHat"
+  ignore_errors: yes
+
 - name: stop nginx
   service: name=nginx state=stopped enabled=no
   ignore_errors: yes
@@ -129,14 +138,6 @@
   when:
     - ansible_os_family == 'RedHat'
 
-# Put SELinux in permissive mode, logging actions that would be blocked, to fix dynazoom.
-- name: selinux permissive
-  selinux:
-    policy: targeted
-    state: permissive
-  when: ansible_os_family == "RedHat"
-  ignore_errors: yes
-
 - name: apache vhost template
   template:
     src: apache2.conf.j2
@@ -157,6 +158,18 @@
 - name: ensite munin
   file: src="{{ munin_apache_dir }}/sites-available/munin.conf" dest="{{ munin_apache_dir }}/sites-enabled/munin.conf" state=link
   notify: restart apache
+
+#ssl.conf on RedHat contains a default vhost, which is conflicting with the munin default vhost.
+- name: fix ssl.conf
+  template:
+    src: ssl.conf.j2
+    dest: "{{ munin_apache_dir }}/conf.d/ssl.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart apache
+  when:
+    - ansible_os_family == 'RedHat'
 
 - name: start apache
   service: name={{ munin_apache_service }} state=started

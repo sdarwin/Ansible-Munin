@@ -6,18 +6,28 @@ sudo: required
 env:
   # MUNIN CLIENT
   # Test general usage. 
-  - distro: debian8
-    init: /lib/systemd/systemd
-    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    playbook: test.yml
   - distro: debian9
     init: /lib/systemd/systemd
     run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
     playbook: test.yml
+    pip: pip
+  - distro: debian10
+    init: /lib/systemd/systemd
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    playbook: test.yml
+    pip: pip
   - distro: centos7
     init: /usr/lib/systemd/systemd
     run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
     playbook: test.yml
+    pip: pip
+    #centos8 Failed to connect to bus: No such file or directory
+    #- distro: centos8
+    #init: /usr/sbin/init
+    #run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    #playbook: test.yml
+    #pip: pip3
+    #trusty is end-of-life. run_opts are different.
     #- distro: trusty
     #init: /sbin/init
     #run_opts: "--privileged"
@@ -26,10 +36,23 @@ env:
     init: /lib/systemd/systemd
     run_opts: '--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro'
     playbook: test.yml
-    #- distro: bionic
-    #init: /lib/systemd/systemd
-    #run_opts: '--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro'
-    #playbook: test.yml
+    pip: pip
+  - distro: focal
+    init: /lib/systemd/systemd
+    run_opts: '--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro'
+    playbook: test.yml
+    pip: pip3
+  - distro: bionic
+    init: /lib/systemd/systemd
+    run_opts: '--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro'
+    playbook: test.yml
+    pip: pip
+  #debian8 is end-of-life. Possible to get minor wget error conflict between SNI and HTTP provided domains
+  - distro: debian8
+    init: /lib/systemd/systemd
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    playbook: test.yml
+    pip: pip
 
 services:
   - docker
@@ -49,10 +72,10 @@ script:
   - 'docker exec --tty "$(cat ${container_id})" env TERM=xterm /bin/bash -c ''cat /etc/ansible/hosts '' '
 
   # upgrade pip
-  - 'docker exec --tty "$(cat ${container_id})" env TERM=xterm pip install --upgrade pip'
+  - 'docker exec --tty "$(cat ${container_id})" env TERM=xterm ${pip} install --upgrade pip'
   
   # upgrade ansible
-  - 'docker exec --tty "$(cat ${container_id})" env TERM=xterm pip install ansible==2.5.9'
+  - 'docker exec --tty "$(cat ${container_id})" env TERM=xterm ${pip} install --upgrade ansible'
 
   # Ansible syntax check.
   - 'sudo docker exec --tty "$(cat ${container_id})" env TERM=xterm ansible-playbook --extra-vars ''${ansible_vars}'' /etc/ansible/roles/role_under_test/tests/${playbook} --syntax-check'
@@ -73,8 +96,10 @@ script:
   # TODO
   
   #Check website
-  #Munin doesn't output html pages for a couple of cycles. Maybe 5 or 10 minutes. A curl or wget will not work.
-  #- 'docker exec "$(cat ${container_id})" env TERM=xterm env ANSIBLE_FORCE_COLOR=1 wget --user muninadmin --password Password1change --no-check-certificate --header=''Host: munin.example.com'' -O - -o /dev/null http://munin.example.com/munin/ | grep ''Categories'' '
+  #Munin doesn't output html pages for a couple of cycles. Manually running the cron.
+  - 'docker exec "$(cat ${container_id})" su - munin --shell=/bin/bash /usr/bin/munin-cron'
+  - 'docker exec "$(cat ${container_id})" sleep 5'
+  - 'docker exec "$(cat ${container_id})" env TERM=xterm env ANSIBLE_FORCE_COLOR=1 wget -4 --http-user=muninadmin --http-password=Password1change --no-check-certificate --header=''Host: munin.example.com'' -O - -o /dev/null https://munin.example.com/ | grep ''Overview''  '
 
 after_success:
   # Clean up.

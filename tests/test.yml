@@ -29,6 +29,12 @@
         msg: "ansible_all_ipv4_addresses is {{ ansible_all_ipv4_addresses }} and ansible_all_ipv6_addresses is {{ ansible_all_ipv6_addresses }}"
 
 - hosts: monitoring-servers
+  vars:
+    #munin_server_auth_method: open
+    #munin_https: disabled
+    munin_users:
+      - user: muninadmin
+        pass: Password1change
   become: true
   roles:
     - { role: 'role_under_test', run_munin_server: true }

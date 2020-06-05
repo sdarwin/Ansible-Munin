@@ -12,7 +12,7 @@
     name: "{{ epel_repo_url }}"
     state: present
   register: result
-  until: '"failed" not in result'
+  until: result.rc == 0
   retries: 5
   delay: 10
   when: ansible_os_family == 'RedHat' and not epel_repofile_result.stat.exists
@@ -23,6 +23,23 @@
     state: present
   when: ansible_os_family == 'RedHat' and not epel_repofile_result.stat.exists
 
+#To enable powertools, see next step
+- name: Install dnf-plugins-core
+  yum:
+    name: dnf-plugins-core
+    state: present
+  when: 
+    - ansible_os_family == 'RedHat'  
+    - ansible_distribution_major_version|int > 7
+
+#For certain Perl modules to be available
+- name: Install powertools
+  command: dnf config-manager --set-enabled PowerTools
+  when: 
+    - ansible_os_family == 'RedHat'  
+    - ansible_distribution_major_version|int > 7
+  changed_when: false
+
 - name: Install required packages for munin (RedHat).
   yum: "name={{ munin_packages }} state=present"
   when: ansible_os_family == 'RedHat'
@@ -32,7 +49,7 @@
   when: ansible_os_family == 'Debian'
 
 - name: create cert (Redhat)
-  shell: /etc/ssl/certs/make-dummy-cert {{ munin_ssl_cert }} ; chmod 640 {{ munin_ssl_cert }} ; chgrp {{ munin_web_user }} {{ munin_ssl_cert }}
+  shell: "{{ make_dummy_cert_path }} {{ munin_ssl_cert }} ; chmod 640 {{ munin_ssl_cert }} ; chgrp {{ munin_web_user }} {{ munin_ssl_cert }}"
   args:
     creates: "{{ munin_ssl_cert }}"
   when:
@@ -77,6 +94,17 @@
   when: munin_admins_group in item.groups
   with_items: "{{ users | default([]) }}"
   changed_when: False
+
+- name: install cron
+  template:
+    src: cron.redhat.j2
+    dest: /etc/cron.d/munin
+    owner: root
+    group: root
+    mode: 0644
+  when:
+    - ansible_os_family == 'RedHat'
+    - ansible_distribution_major_version|int > 7
 
 - name: Enable or disable the munin cron job.
   lineinfile:
