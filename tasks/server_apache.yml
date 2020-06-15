@@ -1,15 +1,15 @@
-
+---
 # Put SELinux in permissive mode, logging actions that would be blocked, to fix dynazoom.
 - name: selinux permissive
   selinux:
     policy: targeted
     state: permissive
   when: ansible_os_family == "RedHat"
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: stop nginx
   service: name=nginx state=stopped enabled=no
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: install the apache package
   package: name={{ munin_apache_service }} state=present
@@ -62,7 +62,7 @@
   when: ansible_os_family == 'Debian'
   notify:
     - restart apache
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: install libcgi-fast-perl for dynazoom
   package: name=libcgi-fast-perl state=present
@@ -70,16 +70,16 @@
   notify:
     - restart apache
 
-#From 2016. Let's comment out for now.
-#- name: fix permissions for dynazoom
-#  command: chown apache.munin /var/log/munin
-#  when: ansible_os_family == 'RedHat'
-#  changed_when: false
+# From 2016. Let's comment out for now.
+# - name: fix permissions for dynazoom
+#   command: chown apache.munin /var/log/munin
+#   when: ansible_os_family == 'RedHat'
+#   changed_when: false
 
-#openid stub code
-#- name: Install openid
-#  include_tasks: "../../apache2/tasks/mod_auth_openid.yml"
-#  when: munin_server_auth_method == "openid" 
+# openid stub code
+# - name: Install openid
+#   include_tasks: "../../apache2/tasks/mod_auth_openid.yml"
+#   when: munin_server_auth_method == "openid"
 
 - name: apache24 munin config, differs from apache22
   template:
@@ -91,23 +91,23 @@
   notify: restart apache
   when: ansible_os_family == 'Debian'
 
-#only Debian7
+# only Debian7
 - name: Debian7 apache munin config symlink
   file: src="{{ munin_basedir }}/apache24.conf" dest="{{ munin_apache_dir }}/conf.d/munin.conf" state=link
   notify: restart apache
   when:
     - ansible_distribution == 'Debian'
     - ansible_distribution_major_version|int <= 7
-    #- ansible_lsb.major_release|int <= 7
+    # - ansible_lsb.major_release|int <= 7
 
-#only Debian7
+# only Debian7
 - name: check release version
   set_fact:
-    Debian7: True
+    Debian7: true
   when:
     - ansible_distribution == 'Debian'
     - ansible_distribution_major_version|int <= 7
-    #- ansible_lsb.major_release|int <= 7
+    # - ansible_lsb.major_release|int <= 7
 
 - name: apache24 munin config symlink
   file: src="{{ munin_basedir }}/apache24.conf" dest="{{ munin_apache_dir }}/conf-available/munin.conf" state=link
@@ -159,7 +159,7 @@
   file: src="{{ munin_apache_dir }}/sites-available/munin.conf" dest="{{ munin_apache_dir }}/sites-enabled/munin.conf" state=link
   notify: restart apache
 
-#ssl.conf on RedHat contains a default vhost, which is conflicting with the munin default vhost.
+# ssl.conf on RedHat contains a default vhost, which is conflicting with the munin default vhost.
 - name: fix ssl.conf
   template:
     src: ssl.conf.j2

@@ -1,11 +1,11 @@
 ---
 sudo: required
 
-#testing
+# testing
 
 env:
   # MUNIN CLIENT
-  # Test general usage. 
+  # Test general usage.
   - distro: debian9
     init: /lib/systemd/systemd
     run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
@@ -21,17 +21,17 @@ env:
     run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
     playbook: test.yml
     pip: pip
-    #centos8 Failed to connect to bus: No such file or directory
-    #- distro: centos8
-    #init: /usr/sbin/init
-    #run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    #playbook: test.yml
-    #pip: pip3
-    #trusty is end-of-life. run_opts are different.
-    #- distro: trusty
-    #init: /sbin/init
-    #run_opts: "--privileged"
-    #playbook: test.yml
+    # centos8 Failed to connect to bus: No such file or directory
+    # - distro: centos8
+    # init: /usr/sbin/init
+    # run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    # playbook: test.yml
+    # pip: pip3
+    # trusty is end-of-life. run_opts are different.
+    # - distro: trusty
+    # init: /sbin/init
+    # run_opts: "--privileged"
+    # playbook: test.yml
   - distro: xenial
     init: /lib/systemd/systemd
     run_opts: '--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro'
@@ -47,7 +47,7 @@ env:
     run_opts: '--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro'
     playbook: test.yml
     pip: pip
-  #debian8 is end-of-life. Possible to get minor wget error conflict between SNI and HTTP provided domains
+  # debian8 is end-of-life. Possible to get minor wget error conflict between SNI and HTTP provided domains
   - distro: debian8
     init: /lib/systemd/systemd
     run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
@@ -73,7 +73,7 @@ script:
 
   # upgrade pip
   - 'docker exec --tty "$(cat ${container_id})" env TERM=xterm ${pip} install --upgrade pip'
-  
+
   # upgrade ansible
   - 'docker exec --tty "$(cat ${container_id})" env TERM=xterm ${pip} install --upgrade ansible'
 
@@ -92,18 +92,17 @@ script:
     && (echo 'Idempotence test: pass' && exit 0)
     || (echo 'Idempotence test: fail' && exit 1)
 
-  # Check if munin is responding on port 4949.
-  # TODO
-  
-  #Check website
-  #Munin doesn't output html pages for a couple of cycles. Manually running the cron.
+  # Check if munin is responding on port 4949. TODO
+  #
+  # Check website
+  # Munin doesn't output html pages for a couple of cycles. Manually running the cron.
   - 'docker exec "$(cat ${container_id})" su - munin --shell=/bin/bash /usr/bin/munin-cron'
   - 'docker exec "$(cat ${container_id})" sleep 5'
-  - 'docker exec "$(cat ${container_id})" env TERM=xterm env ANSIBLE_FORCE_COLOR=1 wget -4 --http-user=muninadmin --http-password=Password1change --no-check-certificate --header=''Host: munin.example.com'' -O - -o /dev/null https://munin.example.com/ | grep ''Overview''  '
+  - 'docker exec "$(cat ${container_id})" env TERM=xterm env ANSIBLE_FORCE_COLOR=1 wget -4 --http-user=muninadmin --http-password=Password1change --no-check-certificate --header=''Host: munin.example.com'' -O - -o /dev/null https://munin.example.com/ | grep ''Overview''  '  # yamllint disable-line
 
 after_success:
   # Clean up.
   - 'sudo docker stop "$(cat ${container_id})"'
 
-#notifications:
-#  webhooks: https://galaxy.ansible.com/api/v1/notifications/
+# notifications:
+#   webhooks: https://galaxy.ansible.com/api/v1/notifications/

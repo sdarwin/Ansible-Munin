@@ -1,7 +1,7 @@
 ---
 - name: stop apache
   service: name="{{ munin_apache_service }}" state=stopped enabled=no
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: install the nginx package
   package: name=nginx state=present

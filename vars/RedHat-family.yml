@@ -1,5 +1,5 @@
 ---
-#server
+# server
 munin_conf_d_directory: /etc/munin/conf.d
 munin_htmldir: /var/www/html/munin
 default_munin_htmlrootdir: /var/www/html/munin
@@ -16,7 +16,7 @@ munin_packages:
   - wget
   - mod_ssl
   - net-tools
-#client
+# client
 munin_node_log: /var/log/munin-node/munin-node.log
 munin_node_pid: /var/run/munin/munin-node.pid
 munin_web_user: apache

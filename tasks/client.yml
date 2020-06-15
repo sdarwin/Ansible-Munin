@@ -1,6 +1,6 @@
 ---
-#- name: Include OS-specific variables.
-#  include_vars: "{{ ansible_os_family }}.yml"
+# - name: Include OS-specific variables.
+#   include_vars: "{{ ansible_os_family }}.yml"
 
 - name: Check if EPEL repo is already configured.
   stat: path={{ epel_repofile_path }}
@@ -25,8 +25,8 @@
 
 - name: Install powertools
   command: dnf config-manager --set-enabled PowerTools
-  when: 
-    - ansible_os_family == 'RedHat' 
+  when:
+    - ansible_os_family == 'RedHat'
     - ansible_distribution_major_version|int > 7
   changed_when: false
 
@@ -47,7 +47,7 @@
     mode: 0644
   notify: restart munin-node
 
-#plugin-conf.d parsed in alphabetical order 
+# plugin-conf.d parsed in alphabetical order
 - name: Generate plugin configuration.
   template:
     src: plugin-conf.j2
