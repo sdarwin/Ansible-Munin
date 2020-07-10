@@ -9,13 +9,16 @@ apache_log_dir: /var/log/httpd
 munin_apache_dir: /etc/httpd
 munin_nginx_dir: /etc/nginx
 munin_packages:
-  - python-passlib
   - munin
   - tree
   - htop
   - wget
   - mod_ssl
   - net-tools
+  - python-pip
+  - python-setuptools
+  - python3-pip
+  - python3-setuptools
 # client
 munin_node_log: /var/log/munin-node/munin-node.log
 munin_node_pid: /var/run/munin/munin-node.pid

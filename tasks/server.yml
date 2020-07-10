@@ -48,6 +48,11 @@
   apt: "name={{ munin_packages }} state=present"
   when: ansible_os_family == 'Debian'
 
+- name: install passlib
+  pip:
+    name:
+      - passlib
+
 - name: create cert (Redhat)
   shell: "{{ make_dummy_cert_path }} {{ munin_ssl_cert }} ; chmod 640 {{ munin_ssl_cert }} ; chgrp {{ munin_web_user }} {{ munin_ssl_cert }}"
   args:
