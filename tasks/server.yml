@@ -52,6 +52,7 @@
   pip:
     name:
       - passlib
+  changed_when: false
 
 - name: create cert (Redhat)
   shell: "{{ make_dummy_cert_path }} {{ munin_ssl_cert }} ; chmod 640 {{ munin_ssl_cert }} ; chgrp {{ munin_web_user }} {{ munin_ssl_cert }}"
@@ -91,11 +92,26 @@
       dest: "{{ munin_conf_d_directory }}/hosts.conf"
 
 - name: Set htpasswd for gui users
-  htpasswd: path=/etc/munin/htpasswd.users name={{ item.user }} password={{ item.pass }} state=present
+  htpasswd:
+    path: /etc/munin/htpasswd.users
+    name: "{{ item.user }}"
+    password: "{{ item.pass }}"
+    state: present
+    owner: root
+    group: root
+    mode: 0644
   with_items: "{{ munin_users | default([]) }}"
 
 - name: Set htpasswd for gui users from users variable
-  htpasswd: crypt_scheme=plaintext path=/etc/munin/htpasswd.users name={{ item.username }} password={{ item.htpasswd }} state=present
+  htpasswd:
+    crypt_scheme: plaintext
+    path: /etc/munin/htpasswd.users
+    name: "{{ item.username }}"
+    password: "{{ item.htpasswd }}"
+    state: present
+    owner: root
+    group: root
+    mode: 0644
   when: munin_admins_group in item.groups
   with_items: "{{ users | default([]) }}"
   changed_when: false
@@ -109,7 +125,7 @@
     mode: 0644
   when:
     - ansible_os_family == 'RedHat'
-    - ansible_distribution_major_version|int > 7
+    - ansible_distribution_major_version|int > 6
 
 - name: Enable or disable the munin cron job.
   lineinfile:

@@ -73,6 +73,10 @@
 
     - name: Run munin cron
       shell: su - munin --shell=/bin/bash /usr/bin/munin-cron  # noqa 305
+      retries: 5
+      delay: 30
+      register: result
+      until: result.rc == 0
       changed_when: false
 
     - name: pause after cron
