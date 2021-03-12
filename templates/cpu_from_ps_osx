@@ -1,0 +1,52 @@
+#!/bin/sh
+# -*- sh -*-
+
+: << =cut
+
+=head1 NAME
+
+cpu_from_ps - Plugin to measure cpu on osx.
+
+=head1 NOTES
+
+Measures the CPU usage by adding up the cpu from all processes, using the ps command.
+
+=head1 LICENSE
+
+GPLv2
+
+=head1 MAGIC MARKERS
+
+ #%# family=auto
+ #%# capabilities=autoconf
+
+=cut
+
+if [ "$1" = "autoconf" ]; then
+        echo yes
+        exit 0
+fi
+
+if [ "$1" = "config" ]; then
+        sentence=$(sysctl hw.ncpu)
+        stringarray=($sentence)
+        NCPU=${stringarray[1]}
+        # NCPU=$(egrep '^cpu[0-9]+ ' /proc/stat | wc -l)
+        if [ "$scaleto100" = "yes" ]; then
+                graphlimit=100
+        else
+                graphlimit=$(($NCPU * 100))
+        fi
+        echo 'graph_title CPU usage (ps command)'
+        #echo "graph_order system user nice idle" $extinfo
+        echo "graph_args --base 1000 -r --lower-limit 0 --upper-limit $graphlimit"
+        echo 'graph_scale no'
+        echo 'graph_vlabel %'
+        echo 'graph_category system'
+        echo 'cpu.label cpu'
+        echo 'cpu.draw AREA'
+        exit 0
+fi
+
+printf "cpu.value "
+ps -A -o %cpu | awk '{s+=$1} END {print s }'

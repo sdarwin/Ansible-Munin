@@ -23,4 +23,6 @@ munin_packages:
 # client
 munin_node_log: /var/log/munin/munin-node.log
 munin_node_pid: /var/run/munin/munin-node.pid
+munin_node_user: root
+munin_node_group: root
 munin_web_user: www-data

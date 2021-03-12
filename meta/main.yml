@@ -2,9 +2,10 @@
 dependencies: []
 
 galaxy_info:
+  role_name: munin
   author: sdarwin
   description: Munin Server and Munin Client
-  license: "license (BSD, MIT)"
+  license: "BSD"
   min_ansible_version: 2.4
   platforms:
     - name: EL
@@ -22,5 +23,8 @@ galaxy_info:
         - jessie
         - wheezy
         - buster
+    - name: MacOSX
+      versions:
+        - all
   galaxy_tags:
     - monitoring

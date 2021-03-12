@@ -7,3 +7,11 @@
 
 - name: restart nginx
   service: name=nginx state=restarted
+
+- name: Run munin-node-configure
+  command: |
+    sudo -u munin munin-node-configure --suggest --shell | sudo sh
+
+- name: restart munin-node-mac
+  command: |
+    /opt/local/bin/port reload munin

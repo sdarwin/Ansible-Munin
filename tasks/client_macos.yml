@@ -1,0 +1,108 @@
+---
+- name: Check if brew exists
+  stat:
+    path: /usr/local/bin/brew
+  register: brew_stat_result
+
+- name: Install brew
+  command: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+  when: not brew_stat_result.stat.exists
+
+- name: Install wget
+  community.general.homebrew:
+    name: wget
+    state: present
+  become: false
+
+- name: Check if port exists
+  stat:
+    path: /opt/local/bin/port
+  register: port_stat_result
+
+- name: Download port
+  get_url:
+    url: https://distfiles.macports.org/MacPorts/MacPorts-2.6.4-10.15-Catalina.pkg
+    dest: /tmp/
+  when: not port_stat_result.stat.exists
+
+- name: Install port
+  command: |
+    sudo installer -pkg /tmp/MacPorts-2.6.4-10.15-Catalina.pkg -target /
+  when: not port_stat_result.stat.exists
+
+- name: Tap a Homebrew repository
+  become: false
+  community.general.homebrew_tap:
+    name: adoptopenjdk/openjdk
+
+- name: Install cask
+  become: false
+  community.general.homebrew_cask:
+    name: adoptopenjdk11
+    state: present
+
+- name: Install munin port from macports
+  macports:
+    name: munin
+    state: present
+  notify:
+    - Run munin-node-configure
+
+- name: Install cpu template
+  template:
+    src: cpu_osx
+    dest: /opt/local/etc/munin/plugins/cpu
+    owner: root
+    group: admin
+    mode: 0755
+  notify: restart munin-node-mac
+
+- name: Install cpu_from_ps template
+  template:
+    src: cpu_from_ps_osx
+    dest: /opt/local/etc/munin/plugins/cpu_from_ps
+    owner: root
+    group: admin
+    mode: 0755
+  notify: restart munin-node-mac
+
+- name: Install memory template
+  template:
+    src: memory_osx
+    dest: /opt/local/etc/munin/plugins/memory
+    owner: root
+    group: admin
+    mode: 0755
+  notify: restart munin-node-mac
+
+- name: Copy munin-node configuration.
+  template:
+    src: munin-node.conf.j2
+    dest: /opt/local/etc/munin/munin-node.conf
+    owner: root
+    group: admin
+    mode: 0644
+  notify: restart munin-node-mac
+
+  # plugin-conf.d parsed in alphabetical order
+- name: Generate plugin configuration.
+  template:
+    src: plugin-conf.j2
+    dest: /opt/local/etc/munin/plugin-conf.d/nansible.conf
+    owner: root
+    group: admin
+    mode: 0644
+  notify: restart munin-node-mac
+
+- name: Enable additional plugins.
+  file:
+    path: "{{ munin_plugin_dest_path }}{{ item.name }}"
+    src: "{{ munin_plugin_src_path }}{{ item.plugin | default( item.name ) }}"
+    state: link
+  with_items: "{{ munin_node_plugins }}"
+  notify: restart munin-node-mac
+
+- name: Ensure munin-node is running.
+  command: |
+    /opt/local/bin/port load munin
+  changed_when: false
