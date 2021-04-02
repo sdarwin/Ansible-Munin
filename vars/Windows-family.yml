@@ -1,0 +1,3 @@
+---
+munin_installer: https://github.com/munin-monitoring/munin-node-win32/releases/download/1.7.3.2/Munin-Node-1.7.3.2-x64.exe
+munin_installer_basename: Munin-Node-1.7.3.2-x64.exe
