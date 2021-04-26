@@ -1,12 +1,26 @@
 ---
 # Variables ##########
-
+#
 - name: Include OS-specific variables.
   include_vars: "{{ ansible_os_family }}-family.yml"
 
 - name: Include Distribution version specific variables
   include_vars: "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
   ignore_errors: true
+  when:
+    - ansible_os_family != 'Darwin'
+
+- name: Determine macos version
+  set_fact:
+    macos_version: "{{ ansible_distribution }}-{{  ansible_distribution_version.split('.')[0] }}.{{  ansible_distribution_version.split('.')[1] }}"
+  when:
+    - ansible_os_family == 'Darwin'
+
+- name: Include Distribution version specific variables for Mac
+  include_vars: "{{ macos_version }}.yml"
+  ignore_errors: true
+  when:
+    - ansible_os_family == 'Darwin'
 
 - name: set facts based on defaults
   set_fact:

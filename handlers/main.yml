@@ -8,9 +8,16 @@
 - name: restart nginx
   service: name=nginx state=restarted
 
+# During testing, munin-node-configure had to be run twice. Investigate.
 - name: Run munin-node-configure
   command: |
-    sudo -u munin munin-node-configure --suggest --shell | sudo sh
+    sleep 1
+    sudo -u munin /opt/local/sbin/munin-node-configure --suggest --shell | sudo sh
+    sleep 1
+    sudo -u munin /opt/local/sbin/munin-node-configure --suggest --shell | sudo sh
+    sleep 1
+    /opt/local/bin/port reload munin
+    sleep 1
 
 - name: restart munin-node-mac
   command: |

@@ -21,13 +21,13 @@
 
 - name: Download port
   get_url:
-    url: https://distfiles.macports.org/MacPorts/MacPorts-2.6.4-10.15-Catalina.pkg
+    url: "{{ munin_macports_url }}"
     dest: /tmp/
   when: not port_stat_result.stat.exists
 
 - name: Install port
   command: |
-    sudo installer -pkg /tmp/MacPorts-2.6.4-10.15-Catalina.pkg -target /
+    sudo installer -pkg /tmp/{{ munin_macports_url | basename }} -target /
   when: not port_stat_result.stat.exists
 
 - name: Tap a Homebrew repository
