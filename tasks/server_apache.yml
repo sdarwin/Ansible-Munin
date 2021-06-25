@@ -5,11 +5,11 @@
     policy: targeted
     state: permissive
   when: ansible_os_family == "RedHat"
-  ignore_errors: true
+  failed_when: false
 
 - name: stop nginx
   service: name=nginx state=stopped enabled=no
-  ignore_errors: true
+  failed_when: false
 
 - name: install the apache package
   package: name={{ munin_apache_service }} state=present
@@ -62,7 +62,7 @@
   when: ansible_os_family == 'Debian'
   notify:
     - restart apache
-  ignore_errors: true
+  failed_when: false
 
 - name: install libcgi-fast-perl for dynazoom
   package: name=libcgi-fast-perl state=present
