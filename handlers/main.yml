@@ -10,7 +10,9 @@
 
 # During testing, munin-node-configure had to be run twice. Investigate.
 - name: Run munin-node-configure
-  command: |
+  args:
+    executable: /bin/bash
+  ansible.builtin.shell: |
     sleep 1
     sudo -u munin /opt/local/sbin/munin-node-configure --suggest --shell | sudo sh
     sleep 1
