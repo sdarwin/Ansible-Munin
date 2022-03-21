@@ -75,6 +75,15 @@
     mode: 0755
   notify: restart munin-node-mac
 
+- name: Install memory_full template
+  template:
+    src: memory_full_osx
+    dest: /opt/local/etc/munin/plugins/memory_full
+    owner: root
+    group: admin
+    mode: 0755
+  notify: restart munin-node-mac
+
 - name: Copy munin-node configuration.
   template:
     src: munin-node.conf.j2
