@@ -1,0 +1,13 @@
+---
+munin_packages:
+  - munin
+  - tree
+  - htop
+  - wget
+  - mod_ssl
+  - net-tools
+  - dnf-plugins-core
+  - python3-libselinux
+  - python3-pip
+  - python3-setuptools
+make_dummy_cert_path: /usr/bin/make-dummy-cert

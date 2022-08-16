@@ -103,7 +103,7 @@
 # only Debian7
 - name: check release version
   set_fact:
-    Debian7: true
+    debian7: true
   when:
     - ansible_distribution == 'Debian'
     - ansible_distribution_major_version|int <= 7
@@ -112,12 +112,12 @@
 - name: apache24 munin config symlink
   file: src="{{ munin_basedir }}/apache24.conf" dest="{{ munin_apache_dir }}/conf-available/munin.conf" state=link
   notify: restart apache
-  when: ansible_os_family == 'Debian' and Debian7 is not defined
+  when: ansible_os_family == 'Debian' and debian7 is not defined
 
 - name: apache24 munin conf-enabled symlink
   file: src="{{ munin_apache_dir }}/conf-available/munin.conf" dest="{{ munin_apache_dir }}/conf-enabled/munin.conf" state=link
   notify: restart apache
-  when: ansible_os_family == 'Debian' and Debian7 is not defined
+  when: ansible_os_family == 'Debian' and debian7 is not defined
 
 - name: apache24 centos7 config file for dynazoom
   template:
