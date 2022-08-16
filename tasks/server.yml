@@ -78,6 +78,12 @@
   import_tasks: "server_nginx.yml"
   when: munin_web_server == "nginx"
 
+- name: Create conf_d dir if missing
+  ansible.builtin.file:
+    path: "{{ munin_conf_d_directory }}"
+    state: directory
+    mode: '0755'
+
 - name: Copy munin configurations.
   template:
     src: "{{ item.src }}"
