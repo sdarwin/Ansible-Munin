@@ -34,10 +34,10 @@
 ##########
 
 - name: include client
-  include: client.yml
+  import_tasks: client.yml
   when: run_munin_client is defined
 
 
 - name: include server
-  include: server.yml
+  import_tasks: server.yml
   when: run_munin_server is defined

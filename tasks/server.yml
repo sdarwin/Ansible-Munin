@@ -71,11 +71,11 @@
     - munin_https == "enabled"
 
 - name: Install apache
-  include: "server_apache.yml"
+  import_tasks: "server_apache.yml"
   when: munin_web_server == "apache2"
 
 - name: Install nginx
-  include: "server_nginx.yml"
+  import_tasks: "server_nginx.yml"
   when: munin_web_server == "nginx"
 
 - name: Copy munin configurations.
