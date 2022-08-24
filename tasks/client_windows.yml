@@ -9,6 +9,8 @@
     url: "{{ munin_installer }}"
     dest: "C:\\opt\\downloads\\{{ munin_installer_basename }}"
 
-- name: Info message
-  ansible.builtin.debug:
-    msg: "To fix: The windows munin client must be installed manually. Log into the server, go to C:/opt/downloads and run the installer."
+- name: Run munin installer
+  ansible.windows.win_shell: |
+    C:\\opt\\downloads\\{{ munin_installer_basename }} /SILENT 
+  args:
+    chdir: "C:\\opt\\downloads"
