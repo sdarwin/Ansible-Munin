@@ -9,15 +9,20 @@
     /usr/sbin/softwareupdate --install-rosetta --agree-to-license
   when: ansible_architecture == "arm64"
 
-- name: Check is brew installed
-  shell: command -v brew >/dev/null 2>&1
+# test on arm cpu also
+- name: Check if brew is installed
+  shell: |
+    export PATH=/usr/local/bin:/opt/homebrew/bin:$PATH
+    command -v brew
+  args:
+    executable: /bin/bash
   register: does_brew_exist
   ignore_errors: true
   changed_when: false
 
 - name: Install brew
   command: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-  when: not does_brew_exist.rc
+  when: does_brew_exist.rc
 
 - name: Install wget
   community.general.homebrew:
