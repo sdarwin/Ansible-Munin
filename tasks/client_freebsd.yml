@@ -1,0 +1,51 @@
+---
+- name: Install packages
+  ansible.builtin.package:
+    name: bash
+    state: present
+
+- name: Install munin-node
+  ansible.builtin.package:
+    name: munin-node
+    state: present
+  notify:
+    - Run munin-node-configure-freebsd
+
+- name: Copy munin-node configuration.
+  template:
+    src: munin-node.conf.j2
+    dest: /usr/local/etc/munin/munin-node.conf
+    owner: root
+    group: wheel
+    mode: 0644
+  notify: restart munin-node
+
+  # plugin-conf.d parsed in alphabetical order
+- name: Generate plugin configuration.
+  template:
+    src: plugin-conf.j2
+    dest: /usr/local/etc/munin/plugin-conf.d/nansible.conf
+    owner: root
+    group: wheel
+    mode: 0644
+  notify: restart munin-node
+
+- name: Enable additional plugins.
+  file:
+    path: "{{ munin_plugin_dest_path }}{{ item.name }}"
+    src: "{{ munin_plugin_src_path }}{{ item.plugin | default( item.name ) }}"
+    state: link
+  with_items: "{{ munin_node_plugins }}"
+  notify: restart munin-node
+
+- name: Enable munin in /etc/rc.conf
+  ansible.builtin.lineinfile:
+    path: /etc/rc.conf
+    regexp: '^munin_node_enable='
+    line: munin_node_enable="YES"
+
+- name: Ensure munin-node is running.
+  command: |
+    /usr/local/etc/rc.d/munin-node start
+  changed_when: false
+  failed_when: false

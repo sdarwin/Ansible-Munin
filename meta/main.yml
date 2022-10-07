@@ -27,5 +27,9 @@ galaxy_info:
     - name: MacOSX
       versions:
         - all
+    - name: FreeBSD
+      versions:
+        - "13.1"
+
   galaxy_tags:
     - monitoring

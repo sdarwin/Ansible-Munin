@@ -11,6 +11,6 @@
 
 - name: Run munin installer
   ansible.windows.win_shell: |
-    C:\\opt\\downloads\\{{ munin_installer_basename }} /SILENT 
+    C:\\opt\\downloads\\{{ munin_installer_basename }} /SILENT
   args:
     chdir: "C:\\opt\\downloads"

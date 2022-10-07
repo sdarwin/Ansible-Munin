@@ -22,7 +22,7 @@
   when:
     - ansible_os_family == 'Darwin'
 
-- name: set facts based on defaults
+- name: set facts based on defaults  # noqa var-naming
   set_fact:
     "{{ item[8:] }}": "{{ lookup('vars', item) }}"
   when:
