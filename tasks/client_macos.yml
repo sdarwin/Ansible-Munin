@@ -43,8 +43,11 @@
   when: not port_stat_result.stat.exists
 
 - name: Install port
-  command: |
+  shell: |
     sudo installer -pkg /tmp/{{ munin_macports_url | basename }} -target /
+    sleep 1
+    # 2022-11 this is new on m1 mac:
+    sudo /opt/local/bin/port selfupdate
   when: not port_stat_result.stat.exists
 
 - name: Tap a Homebrew repository
