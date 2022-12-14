@@ -1,23 +1,24 @@
 ---
 - name: Update repositories cache
-  apt:
+  ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
   when: ansible_os_family == "Debian"
 
 - name: Check if EPEL repo is already configured.
-  stat: path={{ epel_repofile_path }}
+  ansible.builtin.stat:
+    path: "{{ epel_repofile_path }}"
   register: epel_repofile_result
   when: ansible_os_family == 'RedHat'
 
 - name: Import EPEL GPG key.
-  rpm_key:
+  ansible.builtin.rpm_key:
     key: "{{ epel_repo_gpg_key_url }}"
     state: present
   when: ansible_os_family == 'RedHat' and not epel_repofile_result.stat.exists
 
 - name: Install EPEL repo.
-  yum:
+  ansible.builtin.yum:
     name: "{{ epel_repo_url }}"
     state: present
   # register: result
@@ -28,7 +29,7 @@
 
 # To enable powertools, see next step
 - name: Install dnf-plugins-core
-  yum:
+  ansible.builtin.yum:
     name: dnf-plugins-core
     state: present
   when:
@@ -37,7 +38,7 @@
 
 # For certain Perl modules to be available
 - name: Install powertools
-  command: dnf config-manager --set-enabled powertools
+  ansible.builtin.command: dnf config-manager --set-enabled powertools
   when:
     - ansible_os_family == 'RedHat'
     - not ansible_distribution == 'RedHat'
@@ -46,7 +47,7 @@
 
 # The equivalent of powertools on RHEL. Unclear if still required.
 - name: Install powertools
-  command: subscription-manager repos --enable "codeready-builder-for-rhel-{{ ansible_distribution_major_version }}-{{ ansible_architecture }}-rpms"
+  ansible.builtin.command: subscription-manager repos --enable "codeready-builder-for-rhel-{{ ansible_distribution_major_version }}-{{ ansible_architecture }}-rpms"
   when:
     - ansible_os_family == 'RedHat'
     - ansible_distribution == 'RedHat'
@@ -55,39 +56,47 @@
   failed_when: false
 
 - name: Ensure munin-node is installed (RedHat).
-  yum: name=munin-node state=present enablerepo=epel
+  ansible.builtin.yum:
+    name: munin-node
+    state: present
+    enablerepo: epel
   when: ansible_os_family == 'RedHat'
 
 - name: Ensure munin-node is installed (Debian).
-  apt: name=munin-node state=present
+  ansible.builtin.apt:
+    name: munin-node
+    state: present
   when: ansible_os_family == 'Debian'
 
 - name: Copy munin-node configuration.
-  template:
+  ansible.builtin.template:
     src: munin-node.conf.j2
     dest: /etc/munin/munin-node.conf
     owner: root
     group: root
     mode: 0644
-  notify: restart munin-node
+  notify: Restart munin-node
 
 # plugin-conf.d parsed in alphabetical order
 - name: Generate plugin configuration.
-  template:
+  ansible.builtin.template:
     src: plugin-conf.j2
     dest: /etc/munin/plugin-conf.d/nansible.conf
     owner: root
     group: root
     mode: 0644
-  notify: restart munin-node
+  notify: Restart munin-node
 
 - name: Enable additional plugins.
-  file:
+  ansible.builtin.file:
     path: "{{ munin_plugin_dest_path }}{{ item.name }}"
-    src: "{{ munin_plugin_src_path }}{{ item.plugin | default( item.name ) }}"
+    src: "{{ munin_plugin_src_path }}{{ item.plugin | default(item.name) }}"
     state: link
   with_items: "{{ munin_node_plugins }}"
-  notify: restart munin-node
+  notify: Restart munin-node
 
 - name: Ensure munin-node is running.
-  service: name=munin-node state=started enabled=yes
+  ansible.builtin.service:
+    name: munin-node
+    state: started
+    enabled: true

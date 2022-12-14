@@ -2,12 +2,12 @@
 - hosts: all
   pre_tasks:
     - name: Update apt cache.
-      apt: update_cache=yes
+      ansible.builtin.apt: update_cache=yes
       when: ansible_os_family == 'Debian'
       changed_when: false
 
     - name: Install test dependencies (Debian).
-      apt:
+      ansible.builtin.apt:
         name:
           - netcat
           - iproute2
@@ -22,10 +22,10 @@
       when: ansible_os_family == 'RedHat'
 
     - name: gather facts
-      setup:
+      ansible.builtin.setup:
 
     - name: debug variables
-      debug:
+      ansible.builtin.debug:
         msg: "ansible_all_ipv4_addresses is {{ ansible_all_ipv4_addresses }} and ansible_all_ipv6_addresses is {{ ansible_all_ipv6_addresses }}"
 
 - hosts: monitoring-servers
