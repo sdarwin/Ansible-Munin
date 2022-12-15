@@ -5,13 +5,13 @@
 #   register: brew_stat_result
 
 - name: Install rosetta on arm64
-  command: |
+  ansible.builtin.command: |
     /usr/sbin/softwareupdate --install-rosetta --agree-to-license
   when: ansible_architecture == "arm64"
 
 # test on arm cpu also
 - name: Check if brew is installed
-  shell: |
+  ansible.builtin.shell: |
     export PATH=/usr/local/bin:/opt/homebrew/bin:$PATH
     command -v brew
   args:
@@ -21,7 +21,7 @@
   changed_when: false
 
 - name: Install brew
-  command: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+  ansible.builtin.command: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
   when: does_brew_exist.rc
 
 - name: Install wget
@@ -31,19 +31,19 @@
   become: false
 
 - name: Check if port exists
-  stat:
+  ansible.builtin.stat:
     path: /opt/local/bin/port
   register: port_stat_result
 
 - name: Download port
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ munin_macports_url }}"
     dest: /tmp/
     mode: 0755
   when: not port_stat_result.stat.exists
 
 - name: Install port
-  shell: |
+  ansible.builtin.shell: |
     sudo installer -pkg /tmp/{{ munin_macports_url | basename }} -target /
     sleep 1
     # 2022-11 this is new on m1 mac:
@@ -62,67 +62,67 @@
     state: present
 
 - name: Install munin port from macports
-  macports:
+  community.general.macports:
     name: munin
     state: present
   notify:
     - Run munin-node-configure
 
 - name: Install cpu template
-  template:
+  ansible.builtin.template:
     src: cpu_osx
     dest: /opt/local/etc/munin/plugins/cpu
     owner: root
     group: admin
     mode: 0755
-  notify: restart munin-node-mac
+  notify: Restart munin-node-mac
 
 - name: Install cpu_from_ps template
-  template:
+  ansible.builtin.template:
     src: cpu_from_ps_osx
     dest: /opt/local/etc/munin/plugins/cpu_from_ps
     owner: root
     group: admin
     mode: 0755
-  notify: restart munin-node-mac
+  notify: Restart munin-node-mac
 
 - name: Install memory template
-  template:
+  ansible.builtin.template:
     src: memory_osx
     dest: /opt/local/etc/munin/plugins/memory
     owner: root
     group: admin
     mode: 0755
-  notify: restart munin-node-mac
+  notify: Restart munin-node-mac
 
 - name: Copy munin-node configuration.
-  template:
+  ansible.builtin.template:
     src: munin-node.conf.j2
     dest: /opt/local/etc/munin/munin-node.conf
     owner: root
     group: admin
     mode: 0644
-  notify: restart munin-node-mac
+  notify: Restart munin-node-mac
 
   # plugin-conf.d parsed in alphabetical order
 - name: Generate plugin configuration.
-  template:
+  ansible.builtin.template:
     src: plugin-conf.j2
     dest: /opt/local/etc/munin/plugin-conf.d/nansible.conf
     owner: root
     group: admin
     mode: 0644
-  notify: restart munin-node-mac
+  notify: Restart munin-node-mac
 
 - name: Enable additional plugins.
-  file:
+  ansible.builtin.file:
     path: "{{ munin_plugin_dest_path }}{{ item.name }}"
-    src: "{{ munin_plugin_src_path }}{{ item.plugin | default( item.name ) }}"
+    src: "{{ munin_plugin_src_path }}{{ item.plugin | default(item.name) }}"
     state: link
   with_items: "{{ munin_node_plugins }}"
-  notify: restart munin-node-mac
+  notify: Restart munin-node-mac
 
 - name: Ensure munin-node is running.
-  command: |
+  ansible.builtin.command: |
     /opt/local/bin/port load munin
   changed_when: false

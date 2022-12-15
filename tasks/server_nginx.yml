@@ -1,54 +1,73 @@
 ---
-- name: stop apache
-  service: name="{{ munin_apache_service }}" state=stopped enabled=no
+- name: Stop apache
+  ansible.builtin.service:
+    name: "{{ munin_apache_service }}"
+    state: stopped
+    enabled: false
   failed_when: false
 
-- name: install the nginx package
-  package: name=nginx state=present
+- name: Install the nginx package
+  ansible.builtin.package:
+    name: nginx
+    state: present
 
-- name: create nginx sites-available
-  file:
+- name: Create nginx sites-available
+  ansible.builtin.file:
     path: "{{ munin_nginx_dir }}/sites-available"
     state: directory
     owner: root
     group: root
     mode: 0755
 
-- name: create nginx sites-enabled
-  file:
+- name: Create nginx sites-enabled
+  ansible.builtin.file:
     path: "{{ munin_nginx_dir }}/sites-enabled"
     state: directory
     owner: root
     group: root
     mode: 0755
 
-- name: enable nginx sites-enabled
-  lineinfile: dest="{{ munin_nginx_dir }}/nginx.conf" insertafter="^.*include /etc/nginx/conf.d/\*\.conf;" line="    include /etc/nginx/sites-enabled/*;"
+- name: Enable nginx sites-enabled
+  ansible.builtin.lineinfile:
+    dest: "{{ munin_nginx_dir }}/nginx.conf"
+    insertafter: '^.*include /etc/nginx/conf.d/\*\.conf;'
+    line: "    include /etc/nginx/sites-enabled/*;"
   when: ansible_os_family == 'RedHat'
 
-- name: enable the nginx service
-  service: name=nginx enabled=yes
+- name: Enable the nginx service
+  ansible.builtin.service:
+    name: nginx
+    enabled: true
 
-- name: nginx vhost template
-  template:
+- name: The nginx vhost template
+  ansible.builtin.template:
     src: nginx.conf.j2
     dest: "{{ munin_nginx_dir }}/sites-available/munin.conf"
     owner: root
     group: root
     mode: 0644
-  notify: restart nginx
+  notify: Restart nginx
 
-- name: nginx dissite default
-  file: path=/etc/nginx/sites-enabled/default state=absent
-  notify: restart nginx
+- name: Nginx dissite default
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Restart nginx
 
-- name: nginx dissite 000-default
-  file: path=/etc/nginx/sites-enabled/000-default state=absent
-  notify: restart nginx
+- name: Nginx dissite 000-default
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/000-default
+    state: absent
+  notify: Restart nginx
 
-- name: ensite munin
-  file: src=/etc/nginx/sites-available/munin.conf dest=/etc/nginx/sites-enabled/munin.conf state=link
-  notify: restart nginx
+- name: Ensite munin
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/munin.conf
+    dest: /etc/nginx/sites-enabled/munin.conf
+    state: link
+  notify: Restart nginx
 
-- name: start nginx
-  service: name=nginx state=started
+- name: Start nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started

@@ -1,12 +1,18 @@
 ---
-- name: restart munin-node
-  service: name=munin-node state=restarted
+- name: Restart munin-node
+  ansible.builtin.service:
+    name: munin-node
+    state: restarted
 
-- name: restart apache
-  service: name={{ munin_apache_service }} state=restarted
+- name: Restart apache
+  ansible.builtin.service:
+    name: "{{ munin_apache_service }}"
+    state: restarted
 
-- name: restart nginx
-  service: name=nginx state=restarted
+- name: Restart nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
 
 # During testing, munin-node-configure had to be run twice. Investigate.
 - name: Run munin-node-configure
@@ -37,6 +43,6 @@
     /usr/local/etc/rc.d/munin-node start || true
   failed_when: false
 
-- name: restart munin-node-mac
-  command: |
+- name: Restart munin-node-mac
+  ansible.builtin.command: |
     /opt/local/bin/port reload munin
