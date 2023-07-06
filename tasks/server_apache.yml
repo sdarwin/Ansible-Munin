@@ -25,7 +25,7 @@
     state: directory
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
 
 - name: Create apache sites-enabled
   ansible.builtin.file:
@@ -33,12 +33,12 @@
     state: directory
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
 
 - name: Enable apache sites-enabled
   ansible.builtin.lineinfile:
     dest: "{{ munin_apache_dir }}/conf/httpd.conf"
-    line: "IncludeOptional sites-enabled/*.conf"
+    line: IncludeOptional sites-enabled/*.conf
   when: ansible_os_family == 'RedHat'
 
 - name: Enable apache
@@ -106,7 +106,7 @@
     dest: "{{ munin_basedir }}/apache24.conf"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify: Restart apache
   when: ansible_os_family == 'Debian'
 
@@ -153,7 +153,7 @@
     dest: "{{ munin_apache_dir }}/conf.d/munin.conf"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify: Restart apache
   when:
     - ansible_os_family == 'RedHat'
@@ -173,7 +173,7 @@
     dest: "{{ munin_apache_dir }}/sites-available/munin.conf"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify: Restart apache
 
 - name: Apache dissite 000-default
@@ -202,7 +202,7 @@
     dest: "{{ munin_apache_dir }}/conf.d/ssl.conf"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify: Restart apache
   when:
     - ansible_os_family == 'RedHat'

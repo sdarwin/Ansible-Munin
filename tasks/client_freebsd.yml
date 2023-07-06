@@ -17,17 +17,17 @@
     dest: /usr/local/etc/munin/munin-node.conf
     owner: root
     group: wheel
-    mode: 0644
+    mode: "0644"
   notify: Restart munin-node
 
-  # plugin-conf.d parsed in alphabetical order
+# plugin-conf.d parsed in alphabetical order
 - name: Generate plugin configuration.
   ansible.builtin.template:
     src: plugin-conf.j2
     dest: /usr/local/etc/munin/plugin-conf.d/nansible.conf
     owner: root
     group: wheel
-    mode: 0644
+    mode: "0644"
   notify: Restart munin-node
 
 - name: Enable additional plugins.
@@ -41,7 +41,7 @@
 - name: Enable munin in /etc/rc.conf
   ansible.builtin.lineinfile:
     path: /etc/rc.conf
-    regexp: '^munin_node_enable='
+    regexp: ^munin_node_enable=
     line: munin_node_enable="YES"
 
 - name: Ensure munin-node is running.

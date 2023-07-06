@@ -4,10 +4,12 @@
 #     path: /usr/local/bin/brew
 #   register: brew_stat_result
 
+# Could add a check to install or not install this depending on multiple factors
 - name: Install rosetta on arm64
   ansible.builtin.command: |
     /usr/sbin/softwareupdate --install-rosetta --agree-to-license
   when: ansible_architecture == "arm64"
+  changed_when: true
 
 # test on arm cpu also
 - name: Check if brew is installed
@@ -23,6 +25,7 @@
 - name: Install brew
   ansible.builtin.command: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
   when: does_brew_exist.rc
+  changed_when: true
 
 - name: Install wget
   community.general.homebrew:
@@ -39,7 +42,7 @@
   ansible.builtin.get_url:
     url: "{{ munin_macports_url }}"
     dest: /tmp/
-    mode: 0755
+    mode: "0755"
   when: not port_stat_result.stat.exists
 
 - name: Install port
@@ -49,6 +52,7 @@
     # 2022-11 this is new on m1 mac:
     sudo /opt/local/bin/port selfupdate
   when: not port_stat_result.stat.exists
+  changed_when: false
 
 - name: Tap a Homebrew repository
   become: false
@@ -74,7 +78,7 @@
     dest: /opt/local/etc/munin/plugins/cpu
     owner: root
     group: admin
-    mode: 0755
+    mode: "0755"
   notify: Restart munin-node-mac
 
 - name: Install cpu_from_ps template
@@ -83,7 +87,7 @@
     dest: /opt/local/etc/munin/plugins/cpu_from_ps
     owner: root
     group: admin
-    mode: 0755
+    mode: "0755"
   notify: Restart munin-node-mac
 
 - name: Install memory template
@@ -92,7 +96,7 @@
     dest: /opt/local/etc/munin/plugins/memory
     owner: root
     group: admin
-    mode: 0755
+    mode: "0755"
   notify: Restart munin-node-mac
 
 - name: Copy munin-node configuration.
@@ -101,17 +105,17 @@
     dest: /opt/local/etc/munin/munin-node.conf
     owner: root
     group: admin
-    mode: 0644
+    mode: "0644"
   notify: Restart munin-node-mac
 
-  # plugin-conf.d parsed in alphabetical order
+# plugin-conf.d parsed in alphabetical order
 - name: Generate plugin configuration.
   ansible.builtin.template:
     src: plugin-conf.j2
     dest: /opt/local/etc/munin/plugin-conf.d/nansible.conf
     owner: root
     group: admin
-    mode: 0644
+    mode: "0644"
   notify: Restart munin-node-mac
 
 - name: Enable additional plugins.

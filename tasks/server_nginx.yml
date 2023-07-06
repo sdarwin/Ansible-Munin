@@ -17,7 +17,7 @@
     state: directory
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
 
 - name: Create nginx sites-enabled
   ansible.builtin.file:
@@ -25,12 +25,12 @@
     state: directory
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
 
 - name: Enable nginx sites-enabled
   ansible.builtin.lineinfile:
     dest: "{{ munin_nginx_dir }}/nginx.conf"
-    insertafter: '^.*include /etc/nginx/conf.d/\*\.conf;'
+    insertafter: ^.*include /etc/nginx/conf.d/\*\.conf;
     line: "    include /etc/nginx/sites-enabled/*;"
   when: ansible_os_family == 'RedHat'
 
@@ -45,7 +45,7 @@
     dest: "{{ munin_nginx_dir }}/sites-available/munin.conf"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify: Restart nginx
 
 - name: Nginx dissite default

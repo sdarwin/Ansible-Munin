@@ -67,7 +67,7 @@
     - ansible_os_family == "RedHat"
     - munin_https == "enabled"
 
-- name: Create key (Redhat)  # noqa deprecated-command-syntax
+- name: Create key (Redhat)  # noqa no-free-form
   ansible.builtin.shell: mkdir -p /etc/ssl/private ; cp -p {{ munin_ssl_cert }} {{ munin_ssl_key }}
   args:
     creates: "{{ munin_ssl_key }}"
@@ -76,18 +76,18 @@
     - munin_https == "enabled"
 
 - name: Install apache
-  ansible.builtin.import_tasks: "server_apache.yml"
+  ansible.builtin.import_tasks: server_apache.yml
   when: munin_web_server == "apache2"
 
 - name: Install nginx
-  ansible.builtin.import_tasks: "server_nginx.yml"
+  ansible.builtin.import_tasks: server_nginx.yml
   when: munin_web_server == "nginx"
 
 - name: Create conf_d dir if missing
   ansible.builtin.file:
     path: "{{ munin_conf_d_directory }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Copy munin configurations.
   ansible.builtin.template:
@@ -95,7 +95,7 @@
     dest: "{{ item.dest }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   with_items:
     - src: munin.conf.j2
       dest: /etc/munin/munin.conf
@@ -110,7 +110,7 @@
     state: present
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   with_items: "{{ munin_users | default([]) }}"
 
 - name: Set htpasswd for gui users from users variable
@@ -122,7 +122,7 @@
     state: present
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   when: munin_admins_group in item.groups
   with_items: "{{ users | default([]) }}"
   changed_when: false
@@ -133,7 +133,7 @@
     dest: /etc/cron.d/munin
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   when:
     - ansible_os_family == 'RedHat'
     - ansible_distribution_major_version|int > 6
@@ -142,5 +142,5 @@
   ansible.builtin.lineinfile:
     dest: /etc/cron.d/munin
     state: "{{ munin_cron_job }}"
-    regexp: "^\\*/5 \\* \\* \\* \\*"
+    regexp: ^\*/5 \* \* \* \*
     line: "*/5 * * * *     munin test -x /usr/bin/munin-cron && /usr/bin/munin-cron"

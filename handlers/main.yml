@@ -18,7 +18,9 @@
 - name: Run munin-node-configure
   args:
     executable: /bin/bash
+  changed_when: true
   ansible.builtin.shell: |
+    set -o pipefail
     sleep 1
     sudo -u munin /opt/local/sbin/munin-node-configure --suggest --shell | sudo sh
     sleep 1
@@ -30,8 +32,10 @@
 - name: Run munin-node-configure-freebsd
   args:
     executable: /bin/bash
+  changed_when: true
   ansible.builtin.shell: |
     set -xe
+    set -o pipefail
     sleep 1
     /usr/local/sbin/munin-node-configure --shell | sh -x
     sleep 1
@@ -46,3 +50,4 @@
 - name: Restart munin-node-mac
   ansible.builtin.command: |
     /opt/local/bin/port reload munin
+  changed_when: false

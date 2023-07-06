@@ -74,7 +74,7 @@
     dest: /etc/munin/munin-node.conf
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify: Restart munin-node
 
 # plugin-conf.d parsed in alphabetical order
@@ -84,7 +84,7 @@
     dest: /etc/munin/plugin-conf.d/nansible.conf
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify: Restart munin-node
 
 - name: Enable additional plugins.
