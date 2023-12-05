@@ -65,10 +65,22 @@
     name: adoptopenjdk11
     state: present
 
+# 2023-12 it is taking too long, I would like to tee output
+# - name: Install munin port from macports
+#   community.general.macports:
+#     name: munin
+#     state: present
+#   notify:
+#     - Run munin-node-configure
+
+# 2023-12 new attempt. Not yet validated:
+
 - name: Install munin port from macports
-  community.general.macports:
-    name: munin
-    state: present
+  ansible.builtin.shell: |
+    /opt/local/bin/port -N -v install munin | tee /tmp/munin-install.log
+  args:
+    executable: /bin/bash
+    creates: /tmp/munin-install.log
   notify:
     - Run munin-node-configure
 
