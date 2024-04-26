@@ -54,10 +54,10 @@
   when: ansible_os_family == 'Debian'
 
 - name: Install passlib
-  ansible.builtin.pip:
+  ansible.builtin.package:
     name:
-      - passlib
-  changed_when: false
+      - python3-passlib
+    state: present
 
 - name: Create cert (Redhat)
   ansible.builtin.shell: "{{ make_dummy_cert_path }} {{ munin_ssl_cert }} ; chmod 640 {{ munin_ssl_cert }} ; chgrp {{ munin_web_user }} {{ munin_ssl_cert }}"

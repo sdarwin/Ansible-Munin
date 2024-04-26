@@ -1,0 +1,12 @@
+---
+# server
+munin_packages:
+  - munin
+  - tree
+  - htop
+  - wget
+  - ssl-cert
+  - iputils-ping
+  - net-tools
+  - python3-pip
+  - python3-setuptools
