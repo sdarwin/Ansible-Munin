@@ -36,10 +36,10 @@
       - user: muninadmin
         pass: Password1change
   become: true
-  roles:
-    - {role: 'role_under_test', run_munin_server: true}
+  roles: # noqa syntax-check[specific]
+    - {role: 'role_under_test', run_munin_server: true} # noqa syntax-check[specific]
 
 - hosts: all
   become: true
-  roles:
-    - {role: 'role_under_test', run_munin_client: true}
+  roles: # noqa syntax-check[specific]
+    - {role: 'role_under_test', run_munin_client: true} # noqa syntax-check[specific]

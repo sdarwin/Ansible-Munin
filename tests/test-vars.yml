@@ -28,4 +28,4 @@
       when: ansible_os_family == 'RedHat'
 
   roles:
-    - role_under_test
+    - role_under_test # noqa syntax-check[specific]

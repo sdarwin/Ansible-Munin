@@ -1,26 +1,31 @@
 ---
-- hosts: all:!windows:!blackbox
+- name: Collect Facts
+  hosts: all:!windows:!blackbox
   remote_user: ubuntu
   become: true
   tasks:
-    - name: collect facts
-      setup:
+    - name: Collect facts
+      ansible.builtin.setup:
 
-- hosts: windows
+- name: Collect Facts (windows)
+  hosts: windows
   tasks:
-    - name: collect facts
-      setup:
+    - name: Collect facts (windows)
+      ansible.builtin.setup:
 
-- hosts: newservers:!windows
+- name: Install Client (new servers)
+  hosts: newservers:!windows
   become: true
   roles:
     - {role: 'sdarwin.munin', run_munin_client: true}
 
-- hosts: newservers:&windows
+- name: Install Client (new servers windows)
+  hosts: newservers:&windows
   roles:
     - {role: 'sdarwin.munin', run_munin_client: true}
 
-- hosts: monitoring-servers
+- name: Munin Servers
+  hosts: monitoring-servers
   remote_user: ubuntu
   become: true
   roles:

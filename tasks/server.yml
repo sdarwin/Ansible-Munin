@@ -9,7 +9,7 @@
   when: ansible_os_family == 'RedHat'
 
 - name: Install EPEL repo.
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ epel_repo_url }}"
     state: present
   register: result
@@ -26,7 +26,7 @@
 
 # To enable powertools, see next step
 - name: Install dnf-plugins-core
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: dnf-plugins-core
     state: present
   when:
@@ -42,7 +42,7 @@
   changed_when: false
 
 - name: Install required packages for munin (RedHat).
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ munin_packages }}"
     state: present
   when: ansible_os_family == 'RedHat'

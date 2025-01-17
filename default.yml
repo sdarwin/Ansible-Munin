@@ -1,12 +1,14 @@
 ---
-- hosts: all
+- name: Install Clients
+  hosts: all
   # remote_user: ansible
   become: true
   roles:
     # this is the Ansible Galaxy name, you could change it to ansible-munin if directly downloading from github
     - {role: 'sdarwin.munin', run_munin_client: true}
 
-- hosts: monitoring-servers
+- name: Install Munin Servers
+  hosts: monitoring-servers
   # remote_user: ansible
   become: true
   roles:
