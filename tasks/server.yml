@@ -53,6 +53,14 @@
     state: present
   when: ansible_os_family == 'Debian'
 
+- name: Install postgres package for munin (Debian).
+  ansible.builtin.apt:
+    name: libdbd-pg-perl
+    state: present
+  when:
+   - ansible_os_family == 'Debian'
+   - "'db-monitoring' in group_names"
+
 - name: Install passlib
   ansible.builtin.package:
     name:
