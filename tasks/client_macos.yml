@@ -59,6 +59,8 @@
   community.general.homebrew_tap:
     name: adoptopenjdk/openjdk
 
+# You must run "brew edit --cask adoptopenjdk11" and comment out appcast.
+# NO. Replace with temurin.
 - name: Install cask
   become: false
   community.general.homebrew_cask:
