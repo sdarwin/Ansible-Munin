@@ -1,12 +1,12 @@
 ---
 # - name: Include OS-specific variables.
-#   include_vars: "{{ ansible_os_family }}.yml"
+#   include_vars: "{{ ansible_facts['os_family'] }}.yml"
 
 - name: Check if EPEL repo is already configured.
   ansible.builtin.stat:
     path: "{{ epel_repofile_path }}"
   register: epel_repofile_result
-  when: ansible_os_family == 'RedHat'
+  when: ansible_facts['os_family'] == 'RedHat'
 
 - name: Install EPEL repo.
   ansible.builtin.dnf:
@@ -16,13 +16,13 @@
   until: result.rc == 0
   retries: 5
   delay: 10
-  when: ansible_os_family == 'RedHat' and not epel_repofile_result.stat.exists
+  when: ansible_facts['os_family'] == 'RedHat' and not epel_repofile_result.stat.exists
 
 - name: Import EPEL GPG key.
   ansible.builtin.rpm_key:
     key: "{{ epel_repo_gpg_key_url }}"
     state: present
-  when: ansible_os_family == 'RedHat' and not epel_repofile_result.stat.exists
+  when: ansible_facts['os_family'] == 'RedHat' and not epel_repofile_result.stat.exists
 
 # To enable powertools, see next step
 - name: Install dnf-plugins-core
@@ -30,35 +30,35 @@
     name: dnf-plugins-core
     state: present
   when:
-    - ansible_os_family == 'RedHat'
-    - ansible_distribution_major_version|int > 7
+    - ansible_facts['os_family'] == 'RedHat'
+    - ansible_facts['distribution_major_version']|int > 7
 
 # For certain Perl modules to be available
 - name: Install powertools
   ansible.builtin.command: dnf config-manager --set-enabled powertools
   when:
-    - ansible_os_family == 'RedHat'
-    - ansible_distribution_major_version|int > 7
+    - ansible_facts['os_family'] == 'RedHat'
+    - ansible_facts['distribution_major_version']|int > 7
   changed_when: false
 
 - name: Install required packages for munin (RedHat).
   ansible.builtin.dnf:
     name: "{{ munin_packages }}"
     state: present
-  when: ansible_os_family == 'RedHat'
+  when: ansible_facts['os_family'] == 'RedHat'
 
 - name: Install required packages for munin (Debian).
   ansible.builtin.apt:
     name: "{{ munin_packages }}"
     state: present
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts['os_family'] == 'Debian'
 
 - name: Install postgres package for munin (Debian).
   ansible.builtin.apt:
     name: libdbd-pg-perl
     state: present
   when:
-    - ansible_os_family == 'Debian'
+    - ansible_facts['os_family'] == 'Debian'
     - "'db-monitoring' in group_names"
 
 - name: Install passlib
@@ -72,7 +72,7 @@
   args:
     creates: "{{ munin_ssl_cert }}"
   when:
-    - ansible_os_family == "RedHat"
+    - ansible_facts['os_family'] == "RedHat"
     - munin_https == "enabled"
 
 - name: Create key (Redhat)  # noqa no-free-form
@@ -80,7 +80,7 @@
   args:
     creates: "{{ munin_ssl_key }}"
   when:
-    - ansible_os_family == "RedHat"
+    - ansible_facts['os_family'] == "RedHat"
     - munin_https == "enabled"
 
 - name: Install apache
@@ -143,8 +143,8 @@
     group: root
     mode: "0644"
   when:
-    - ansible_os_family == 'RedHat'
-    - ansible_distribution_major_version|int > 6
+    - ansible_facts['os_family'] == 'RedHat'
+    - ansible_facts['distribution_major_version']|int > 6
 
 - name: Enable or disable the munin cron job.  # noqa args[module]
   ansible.builtin.lineinfile:

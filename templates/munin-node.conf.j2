@@ -47,10 +47,10 @@ host_name {{ inventory_hostname }}
 allow {{ allowed_ip }}
 {% endfor %}
 {% for host in groups[munin_monitoring_servers_group_name] %}
-{% for ip in hostvars[host]['ansible_all_ipv4_addresses'] %}
+{% for ip in hostvars[host]['ansible_facts']['all_ipv4_addresses'] %}
 allow ^{{ ip | regex_replace('\.', '\.') }}$
 {% endfor %}
-{% for ip in hostvars[host]['ansible_all_ipv6_addresses'] %}
+{% for ip in hostvars[host]['ansible_facts']['all_ipv6_addresses'] %}
 allow ^{{ ip }}$
 {% endfor %}
 {% endfor %}

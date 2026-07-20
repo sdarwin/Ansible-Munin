@@ -3,7 +3,7 @@
   pre_tasks:
     - name: Update apt cache.
       ansible.builtin.apt: update_cache=yes
-      when: ansible_os_family == 'Debian'
+      when: ansible_facts['os_family'] == 'Debian'
       changed_when: false
 
     - name: Install test dependencies (Debian).
@@ -12,21 +12,21 @@
           - netcat
           - iproute2
           - curl
-      when: ansible_os_family == 'Debian'
+      when: ansible_facts['os_family'] == 'Debian'
 
     - name: Install test dependencies (RedHat).
       yum:
         name:
           - nc
           - curl
-      when: ansible_os_family == 'RedHat'
+      when: ansible_facts['os_family'] == 'RedHat'
 
     - name: gather facts
       ansible.builtin.setup:
 
     - name: debug variables
       ansible.builtin.debug:
-        msg: "ansible_all_ipv4_addresses is {{ ansible_all_ipv4_addresses }} and ansible_all_ipv6_addresses is {{ ansible_all_ipv6_addresses }}"
+        msg: "ansible_all_ipv4_addresses is {{ ansible_facts['all_ipv4_addresses'] }} and ansible_all_ipv6_addresses is {{ ansible_facts['all_ipv6_addresses'] }}"
 
 - hosts: monitoring-servers
   vars:

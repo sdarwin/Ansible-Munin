@@ -8,7 +8,7 @@
 - name: Install rosetta on arm64
   ansible.builtin.command: |
     /usr/sbin/softwareupdate --install-rosetta --agree-to-license
-  when: ansible_architecture == "arm64"
+  when: ansible_facts['architecture'] == "arm64"
   changed_when: true
 
 # test on arm cpu also

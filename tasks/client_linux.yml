@@ -3,19 +3,19 @@
   ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
-  when: ansible_os_family == "Debian"
+  when: ansible_facts['os_family'] == "Debian"
 
 - name: Check if EPEL repo is already configured.
   ansible.builtin.stat:
     path: "{{ epel_repofile_path }}"
   register: epel_repofile_result
-  when: ansible_os_family == 'RedHat'
+  when: ansible_facts['os_family'] == 'RedHat'
 
 - name: Import EPEL GPG key.
   ansible.builtin.rpm_key:
     key: "{{ epel_repo_gpg_key_url }}"
     state: present
-  when: ansible_os_family == 'RedHat' and not epel_repofile_result.stat.exists
+  when: ansible_facts['os_family'] == 'RedHat' and not epel_repofile_result.stat.exists
 
 - name: Install EPEL repo.
   ansible.builtin.dnf:
@@ -25,7 +25,7 @@
   # until: result.rc is succeeded
   # retries: 5
   # delay: 10
-  when: ansible_os_family == 'RedHat' and not epel_repofile_result.stat.exists
+  when: ansible_facts['os_family'] == 'RedHat' and not epel_repofile_result.stat.exists
 
 # To enable powertools, see next step
 - name: Install dnf-plugins-core
@@ -33,25 +33,25 @@
     name: dnf-plugins-core
     state: present
   when:
-    - ansible_os_family == 'RedHat'
-    - ansible_distribution_major_version|int > 7
+    - ansible_facts['os_family'] == 'RedHat'
+    - ansible_facts['distribution_major_version']|int > 7
 
 # For certain Perl modules to be available
 - name: Install powertools
   ansible.builtin.command: dnf config-manager --set-enabled powertools
   when:
-    - ansible_os_family == 'RedHat'
-    - not ansible_distribution == 'RedHat'
-    - ansible_distribution_major_version|int > 7
+    - ansible_facts['os_family'] == 'RedHat'
+    - not ansible_facts['distribution'] == 'RedHat'
+    - ansible_facts['distribution_major_version']|int > 7
   changed_when: false
 
 # The equivalent of powertools on RHEL. Unclear if still required.
 - name: Install powertools
-  ansible.builtin.command: subscription-manager repos --enable "codeready-builder-for-rhel-{{ ansible_distribution_major_version }}-{{ ansible_architecture }}-rpms"
+  ansible.builtin.command: subscription-manager repos --enable "codeready-builder-for-rhel-{{ ansible_facts['distribution_major_version'] }}-{{ ansible_facts['architecture'] }}-rpms"
   when:
-    - ansible_os_family == 'RedHat'
-    - ansible_distribution == 'RedHat'
-    - ansible_distribution_major_version|int > 7
+    - ansible_facts['os_family'] == 'RedHat'
+    - ansible_facts['distribution'] == 'RedHat'
+    - ansible_facts['distribution_major_version']|int > 7
   changed_when: false
   failed_when: false
 
@@ -60,13 +60,13 @@
     name: munin-node
     state: present
     enablerepo: epel
-  when: ansible_os_family == 'RedHat'
+  when: ansible_facts['os_family'] == 'RedHat'
 
 - name: Ensure munin-node is installed (Debian).
   ansible.builtin.apt:
     name: munin-node
     state: present
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts['os_family'] == 'Debian'
 
 - name: Copy munin-node configuration.
   ansible.builtin.template:

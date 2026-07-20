@@ -2,7 +2,7 @@
 
 <VirtualHost *:{{ munin_web_server_port }}>
   ServerAdmin   {{ munin_sysadmin_email }}
-  ServerName    {{ ansible_fqdn }}
+  ServerName    {{ ansible_facts['fqdn'] }}
   ServerAlias   munin {{ munin_public_domain }}
   Alias         /munin {{ munin_htmldir }}
   DocumentRoot  {{ munin_htmlrootdir }}
@@ -45,7 +45,7 @@
 <IfModule mod_ssl.c>
         <VirtualHost _default_:443>
   		ServerAdmin   {{ munin_sysadmin_email }}
-  		ServerName    {{ ansible_fqdn }}
+  		ServerName    {{ ansible_facts['fqdn'] }}
   		ServerAlias   munin {{ munin_public_domain }}
   		Alias         /munin {{ munin_htmldir }}
   		DocumentRoot  {{ munin_htmlrootdir }}

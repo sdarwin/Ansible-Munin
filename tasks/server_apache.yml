@@ -4,7 +4,7 @@
   ansible.posix.selinux:
     policy: targeted
     state: permissive
-  when: ansible_os_family == "RedHat"
+  when: ansible_facts['os_family'] == "RedHat"
   failed_when: false
 
 - name: Stop nginx
@@ -39,7 +39,7 @@
   ansible.builtin.lineinfile:
     dest: "{{ munin_apache_dir }}/conf/httpd.conf"
     line: IncludeOptional sites-enabled/*.conf
-  when: ansible_os_family == 'RedHat'
+  when: ansible_facts['os_family'] == 'RedHat'
 
 - name: Enable apache
   ansible.builtin.service:
@@ -51,7 +51,7 @@
     name: ssl
     state: present
   when:
-    - ansible_os_family == 'Debian'
+    - ansible_facts['os_family'] == 'Debian'
     - munin_https == 'enabled'
   notify:
     - Restart apache
@@ -60,7 +60,7 @@
   community.general.apache2_module:
     name: rewrite
     state: present
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts['os_family'] == 'Debian'
   notify:
     - Restart apache
 
@@ -68,7 +68,7 @@
   community.general.apache2_module:
     name: cgid
     state: present
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts['os_family'] == 'Debian'
   notify:
     - Restart apache
 
@@ -76,7 +76,7 @@
   community.general.apache2_module:
     name: cgi
     state: present
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts['os_family'] == 'Debian'
   notify:
     - Restart apache
   failed_when: false
@@ -85,14 +85,14 @@
   ansible.builtin.package:
     name: libcgi-fast-perl
     state: present
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts['os_family'] == 'Debian'
   notify:
     - Restart apache
 
 # From 2016. Let's comment out for now.
 # - name: fix permissions for dynazoom
 #   command: chown apache.munin /var/log/munin
-#   when: ansible_os_family == 'RedHat'
+#   when: ansible_facts['os_family'] == 'RedHat'
 #   changed_when: false
 
 # openid stub code
@@ -108,7 +108,7 @@
     group: root
     mode: "0644"
   notify: Restart apache
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts['os_family'] == 'Debian'
 
 # only Debian7
 - name: Debian7 apache munin config symlink
@@ -118,18 +118,18 @@
     state: link
   notify: Restart apache
   when:
-    - ansible_distribution == 'Debian'
-    - ansible_distribution_major_version|int <= 7
-    # - ansible_lsb.major_release|int <= 7
+    - ansible_facts['distribution'] == 'Debian'
+    - ansible_facts['distribution_major_version']|int <= 7
+    # - ansible_facts['lsb'].major_release|int <= 7
 
 # only Debian7
 - name: Check release version
   ansible.builtin.set_fact:
     debian7: true
   when:
-    - ansible_distribution == 'Debian'
-    - ansible_distribution_major_version|int <= 7
-    # - ansible_lsb.major_release|int <= 7
+    - ansible_facts['distribution'] == 'Debian'
+    - ansible_facts['distribution_major_version']|int <= 7
+    # - ansible_facts['lsb'].major_release|int <= 7
 
 - name: Apache24 munin config symlink
   ansible.builtin.file:
@@ -137,7 +137,7 @@
     dest: "{{ munin_apache_dir }}/conf-available/munin.conf"
     state: link
   notify: Restart apache
-  when: ansible_os_family == 'Debian' and debian7 is not defined
+  when: ansible_facts['os_family'] == 'Debian' and debian7 is not defined
 
 - name: Apache24 munin conf-enabled symlink
   ansible.builtin.file:
@@ -145,7 +145,7 @@
     dest: "{{ munin_apache_dir }}/conf-enabled/munin.conf"
     state: link
   notify: Restart apache
-  when: ansible_os_family == 'Debian' and debian7 is not defined
+  when: ansible_facts['os_family'] == 'Debian' and debian7 is not defined
 
 - name: Apache24 centos7 config file for dynazoom
   ansible.builtin.template:
@@ -156,7 +156,7 @@
     mode: "0644"
   notify: Restart apache
   when:
-    - ansible_os_family == 'RedHat'
+    - ansible_facts['os_family'] == 'RedHat'
 
 - name: Adding user apache to munin group for dynazoom
   ansible.builtin.user:
@@ -165,7 +165,7 @@
     groups: munin
     append: true
   when:
-    - ansible_os_family == 'RedHat'
+    - ansible_facts['os_family'] == 'RedHat'
 
 - name: Apache vhost template
   ansible.builtin.template:
@@ -205,7 +205,7 @@
     mode: "0644"
   notify: Restart apache
   when:
-    - ansible_os_family == 'RedHat'
+    - ansible_facts['os_family'] == 'RedHat'
 
 - name: Start apache
   ansible.builtin.service:
