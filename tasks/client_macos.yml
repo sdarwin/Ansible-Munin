@@ -24,7 +24,11 @@
 
 - name: Install brew
   ansible.builtin.command: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-  when: does_brew_exist.rc
+  when: does_brew_exist.rc != 0
+  become: true
+  become_user: administrator
+  environment:
+    NONINTERACTIVE: "1"
   changed_when: true
 
 - name: Install wget
@@ -55,14 +59,16 @@
   changed_when: false
 
 - name: Tap a Homebrew repository
-  become: false
+  become: true
+  become_user: administrator
   community.general.homebrew_tap:
     name: adoptopenjdk/openjdk
 
 # You must run "brew edit --cask adoptopenjdk11" and comment out appcast.
 # NO. Replace with temurin.
 - name: Install cask
-  become: false
+  become: true
+  become_user: administrator
   community.general.homebrew_cask:
     name: adoptopenjdk11
     state: present
