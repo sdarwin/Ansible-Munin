@@ -35,7 +35,8 @@
   community.general.homebrew:
     name: wget
     state: present
-  become: false
+  become: true
+  become_user: administrator
 
 - name: Check if port exists
   ansible.builtin.stat:
