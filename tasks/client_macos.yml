@@ -58,19 +58,42 @@
   when: not port_stat_result.stat.exists
   changed_when: false
 
-- name: Tap a Homebrew repository
+# AdoptOpenJDK became Eclipse Temurin, and the adoptopenjdk/openjdk tap was
+# deprecated in August 2021. Its casks still carry an "appcast" stanza, which
+# Homebrew has since removed from the cask DSL, so they no longer even parse:
+# "Unexpected method 'appcast' called on Cask adoptopenjdk11". Editing the cask
+# to drop that stanza used to work and no longer does.
+#
+# Hosts provisioned earlier still have the dead cask installed and the tap
+# present, and brew keeps reporting the appcast error on unrelated commands
+# until both are gone. The Caskroom directory is checked directly because
+# "brew list --cask" has to load the unparseable definition to answer.
+- name: Remove the deprecated adoptopenjdk cask and tap
+  ansible.builtin.shell: |
+    export PATH=/usr/local/bin:/opt/homebrew/bin:$PATH
+    if [ -d "$(brew --prefix)/Caskroom/adoptopenjdk11" ]; then
+        brew uninstall --cask --force adoptopenjdk11
+    fi
+    if brew tap | grep -qx adoptopenjdk/openjdk; then
+        brew untap adoptopenjdk/openjdk
+    fi
+  args:
+    executable: /bin/bash
   become: true
   become_user: administrator
-  community.general.homebrew_tap:
-    name: adoptopenjdk/openjdk
+  register: munin_adoptopenjdk_cleanup
+  changed_when: munin_adoptopenjdk_cleanup.stdout != ""
+  failed_when: false
 
-# You must run "brew edit --cask adoptopenjdk11" and comment out appcast.
-# NO. Replace with temurin.
-- name: Install cask
+# Temurin is the same JDK and ships in homebrew/cask itself, so no tap. The
+# cask is a pkg, so brew runs the installer under sudo: that is silent for
+# administrator only because the account has passwordless sudo. Otherwise pass
+# sudo_password to this module.
+- name: Install temurin JDK
   become: true
   become_user: administrator
   community.general.homebrew_cask:
-    name: adoptopenjdk11
+    name: temurin@11
     state: present
 
 # 2023-12 it is taking too long, I would like to tee output
