@@ -86,10 +86,17 @@
   changed_when: munin_adoptopenjdk_cleanup.stdout != ""
   failed_when: false
 
-# Temurin is the same JDK and ships in homebrew/cask itself, so no tap. The
-# cask is a pkg, so brew runs the installer under sudo: that is silent for
-# administrator only because the account has passwordless sudo. Otherwise pass
-# sudo_password to this module.
+# The macports munin port needs a JDK, which is why this exists: its destroot
+# includes install-plugins-java for the bundled JMX plugins, and its Portfile
+# declares "java.version 1.7+" with "java.fallback openjdk11". MacPorts locates
+# a JDK through /usr/libexec/java_home, which finds this cask, so it does not
+# pull in its own port:openjdk11 instead. So keep this ahead of the macports
+# install below.
+#
+# Temurin is the same JDK as the old adoptopenjdk, and it ships in
+# homebrew/cask itself, so no tap. The cask is a pkg, so brew runs the
+# installer under sudo: that is silent for administrator only because the
+# account has passwordless sudo. Otherwise pass sudo_password to this module.
 - name: Install temurin JDK
   become: true
   become_user: administrator
