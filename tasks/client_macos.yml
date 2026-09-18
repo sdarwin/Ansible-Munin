@@ -1,4 +1,34 @@
 ---
+# MacPorts will not build anything without the command line tools, and
+# "port install munin" below builds from source, so this has to come first.
+#
+# On the dronerunner hosts that directory is deliberately not there: their
+# bootstrap scripts move it to CommandLineTools.bck once the Xcode versions
+# under /Applications are installed, so that builds resolve against a chosen
+# Xcode rather than the tools. It is put back for the length of this file and
+# moved aside again at the end, leaving the host as it was found.
+- name: Check for the command line tools
+  ansible.builtin.stat:
+    path: /Library/Developer/CommandLineTools
+  register: munin_clt
+
+- name: Check for the command line tools moved aside
+  ansible.builtin.stat:
+    path: /Library/Developer/CommandLineTools.bck
+  register: munin_clt_bck
+
+# Whether this ran is what the last task in the file reads, through "is
+# changed", so that hosts which simply have the tools installed normally are
+# left alone rather than having them taken away.
+- name: Restore the command line tools
+  ansible.builtin.command:
+    cmd: mv /Library/Developer/CommandLineTools.bck /Library/Developer/CommandLineTools
+    creates: /Library/Developer/CommandLineTools
+  when:
+    - not munin_clt.stat.exists
+    - munin_clt_bck.stat.exists
+  register: munin_clt_restored
+
 # - name: Check if brew exists
 #   stat:
 #     path: /usr/local/bin/brew
@@ -182,3 +212,11 @@
   ansible.builtin.command: |
     /opt/local/bin/port load munin
   changed_when: false
+
+# Only if this file is what put them there. A host where the tools were found
+# already installed keeps them.
+- name: Move the command line tools aside again
+  ansible.builtin.command:
+    cmd: mv /Library/Developer/CommandLineTools /Library/Developer/CommandLineTools.bck
+    removes: /Library/Developer/CommandLineTools
+  when: munin_clt_restored is changed
