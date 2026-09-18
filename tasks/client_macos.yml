@@ -29,6 +29,32 @@
     - munin_clt_bck.stat.exists
   register: munin_clt_restored
 
+# Catalina's brew is pinned, by scripts/bootstrap_mac_earlier_than_14.sh in the
+# dronerunner repo: 6.0.22, whose own floor is still 10.15, with homebrew-core
+# checked out at a 2022 commit for the sake of the catalina bottles. Brew needs
+# telling that, and these are the same two variables that script exports.
+#
+# NO_INSTALL_FROM_API is the one that surfaces as an error: brew otherwise reads
+# formulae from formulae.brew.sh, whose per-OS index for an unsupported release
+# does not exist, so every command dies on "packages.catalina.jws.json ... HTTP
+# status: 404" before doing any work. NO_AUTO_UPDATE stops brew upgrading itself
+# to 7.x on the first install, which would leave the host with a brew that
+# refuses to start. NO_ASK is for brew 6's habit of prompting to confirm a plan
+# that pulls in dependencies.
+#
+# Empty on every other host. Disabling the API elsewhere would send a current
+# brew looking for a homebrew-core clone it has no reason to have.
+- name: Set the homebrew environment
+  ansible.builtin.set_fact:
+    munin_catalina: "{{ munin_is_catalina | bool }}"
+    munin_brew_env: "{{ munin_brew_env_catalina if munin_is_catalina | bool else {} }}"
+  vars:
+    munin_is_catalina: "{{ ansible_facts['distribution_version'].startswith('10.15') }}"
+    munin_brew_env_catalina:
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      HOMEBREW_NO_INSTALL_FROM_API: "1"
+      HOMEBREW_NO_ASK: "1"
+
 # - name: Check if brew exists
 #   stat:
 #     path: /usr/local/bin/brew
@@ -67,6 +93,7 @@
     state: present
   become: true
   become_user: administrator
+  environment: "{{ munin_brew_env }}"
 
 - name: Check if port exists
   ansible.builtin.stat:
@@ -112,6 +139,7 @@
     executable: /bin/bash
   become: true
   become_user: administrator
+  environment: "{{ munin_brew_env }}"
   register: munin_adoptopenjdk_cleanup
   changed_when: munin_adoptopenjdk_cleanup.stdout != ""
   failed_when: false
@@ -130,9 +158,44 @@
 - name: Install temurin JDK
   become: true
   become_user: administrator
+  environment: "{{ munin_brew_env }}"
   community.general.homebrew_cask:
     name: temurin@11
     state: present
+  when: not munin_catalina | bool
+
+# Catalina cannot reach a cask at all: with the API switched off brew wants the
+# homebrew/cask tap on disk, and only homebrew-core was cloned there. Cloning a
+# second large tap for one package is not worth it, so the pkg comes straight
+# from Adoptium instead.
+#
+# These are the same bits, not a substitute. The temurin@11 cask downloads its
+# pkg from the adoptium/temurin11-binaries releases and discovers versions
+# through this same api.adoptium.net, so all that is skipped here is brew's
+# bookkeeping. x64 is hardcoded because Catalina never ran on Apple silicon.
+- name: Install temurin JDK on catalina
+  when: munin_catalina | bool
+  block:
+    - name: Check for temurin
+      ansible.builtin.stat:
+        path: /Library/Java/JavaVirtualMachines/temurin-11.jdk
+      register: munin_temurin
+
+    - name: Download the temurin JDK installer
+      ansible.builtin.get_url:
+        url: https://api.adoptium.net/v3/installer/latest/11/ga/mac/x64/jdk/hotspot/normal/eclipse
+        dest: /tmp/temurin11.pkg
+        mode: "0644"
+      when: not munin_temurin.stat.exists
+
+    # Installed rather than unpacked, because what MacPorts looks for is
+    # /usr/libexec/java_home, which reports the JDKs registered under
+    # /Library/Java/JavaVirtualMachines. The cask does exactly this too.
+    - name: Install the temurin JDK pkg
+      ansible.builtin.command:
+        cmd: /usr/sbin/installer -pkg /tmp/temurin11.pkg -target /
+        creates: /Library/Java/JavaVirtualMachines/temurin-11.jdk
+      when: not munin_temurin.stat.exists
 
 # 2023-12 it is taking too long, I would like to tee output
 # - name: Install munin port from macports
