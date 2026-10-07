@@ -113,6 +113,11 @@ munin_node_config: {}
 munin_auto_load_thresholds: false
 munin_load_warning_factor: 2
 munin_load_critical_factor: 4
+
+# FreeBSD pkgng install options. Default to false to match pkgng's own
+# defaults; opt in per host (e.g. EOL/STABLE CI boxes) via host_vars.
+munin_pkg_cached: false
+munin_pkg_ignore_osver: false
 epel_repo_url: https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm
 epel_repo_gpg_key_url: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_facts['distribution_major_version'] }}
 # Had this before.

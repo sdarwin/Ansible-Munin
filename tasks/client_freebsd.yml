@@ -1,13 +1,24 @@
 ---
+# Use community.general.pkgng (not the generic `package` module) so that
+# `cached` and `ignore_osver` can be set. These default to false, matching
+# pkgng's own defaults. On CI boxes that deliberately run old/EOL FreeBSD
+# releases, the repo catalogue may not match the running OS version ("packages
+# for wrong OS version"). For those hosts set in group_vars/host_vars:
+#   munin_pkg_cached: true          # skip `pkg update`; install from local cache
+#   munin_pkg_ignore_osver: true    # pass IGNORE_OSVERSION=yes (STABLE/CURRENT)
 - name: Install packages
-  ansible.builtin.package:
+  community.general.pkgng:
     name: bash
     state: present
+    cached: "{{ munin_pkg_cached | bool }}"
+    ignore_osver: "{{ munin_pkg_ignore_osver | bool }}"
 
 - name: Install munin-node
-  ansible.builtin.package:
+  community.general.pkgng:
     name: munin-node
     state: present
+    cached: "{{ munin_pkg_cached | bool }}"
+    ignore_osver: "{{ munin_pkg_ignore_osver | bool }}"
   notify:
     - Run munin-node-configure-freebsd
 
