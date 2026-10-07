@@ -32,6 +32,42 @@
   when: item[8:] not in query('varnames', '.*')
   loop: "{{ query('varnames', '^default_') }}"
 
+# The load plugin reads differently-named env vars depending on platform:
+# macOS reads load_warn/load_crit, Linux reads load_warning/load_critical.
+# FreeBSD's load plugin hardcodes its thresholds and ignores env vars, so this
+# feature targets macOS and Linux only.
+- name: Calculate CPU-derived thresholds for the load plugin
+  ansible.builtin.set_fact:
+    munin_load_warning_value: "{{ ansible_processor_vcpus | default(1) | int * munin_load_warning_factor | int }}"
+    munin_load_critical_value: "{{ ansible_processor_vcpus | default(1) | int * munin_load_critical_factor | int }}"
+  when:
+    - munin_auto_load_thresholds | bool
+    - munin_node_config['load'] is not defined
+
+- name: Set load plugin thresholds (macOS)
+  ansible.builtin.set_fact:
+    munin_node_config: >-
+      {{ munin_node_config | combine({'load': {
+            'env.load_warn': munin_load_warning_value,
+            'env.load_crit': munin_load_critical_value
+          }}) }}
+  when:
+    - munin_auto_load_thresholds | bool
+    - munin_node_config['load'] is not defined
+    - ansible_facts['system'] == 'Darwin'
+
+- name: Set load plugin thresholds (Linux)
+  ansible.builtin.set_fact:
+    munin_node_config: >-
+      {{ munin_node_config | combine({'load': {
+            'env.load_warning': munin_load_warning_value,
+            'env.load_critical': munin_load_critical_value
+          }}) }}
+  when:
+    - munin_auto_load_thresholds | bool
+    - munin_node_config['load'] is not defined
+    - ansible_facts['system'] == 'Linux'
+
 ##########
 
 - name: Include client

@@ -105,6 +105,14 @@ munin_node_plugins: []
 # }
 
 munin_node_config: {}
+
+# Automatically derive warning/critical thresholds for the load plugin from the
+# number of CPUs (ansible_processor_vcpus). The thresholds become
+# vcpus * munin_load_warning_factor and vcpus * munin_load_critical_factor.
+# A host/group var of munin_node_config.load always wins over this feature.
+munin_auto_load_thresholds: false
+munin_load_warning_factor: 2
+munin_load_critical_factor: 4
 epel_repo_url: https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm
 epel_repo_gpg_key_url: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_facts['distribution_major_version'] }}
 # Had this before.
