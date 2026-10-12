@@ -109,12 +109,14 @@ not account for how many CPUs a machine has, which produces noisy alerts on
 busy CI machines. Set `munin_auto_load_thresholds: true` (for example in
 `group_vars/ci.yml`) to derive them from the CPU count instead:
 
-    warning  = number of vCPUs * munin_load_warning_factor   (default 2)
-    critical = number of vCPUs * munin_load_critical_factor  (default 4)
+    warning  = number of vCPUs * munin_load_warning_factor   (default 6)
+    critical = number of vCPUs * munin_load_critical_factor  (default 15)
 
 `munin_load_warning_factor` and `munin_load_critical_factor` may be overridden.
-Supported on macOS and Linux. An explicitly defined `munin_node_config.load`
-always takes precedence over this feature.
+The factors are deliberately loose because load is a runnable/I/O-blocked queue
+length, not CPU utilization, and busy CI boxes legitimately sit at many times
+their core count. Supported on macOS, FreeBSD, and Linux. An explicitly defined
+`munin_node_config.load` always takes precedence over this feature.
 
 ## Dependencies
 

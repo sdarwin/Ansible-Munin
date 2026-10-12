@@ -110,9 +110,13 @@ munin_node_config: {}
 # number of CPUs (ansible_processor_vcpus). The thresholds become
 # vcpus * munin_load_warning_factor and vcpus * munin_load_critical_factor.
 # A host/group var of munin_node_config.load always wins over this feature.
+# The factors are deliberately loose so busy CI boxes stay quiet: load is a
+# runnable/I/O-blocked queue length, not CPU utilization, and naturally sits at
+# many times the core count during builds. A 4-core box warns at 24 and goes
+# critical at 60, mirroring the spirit of the old fixed 10/120 defaults.
 munin_auto_load_thresholds: false
-munin_load_warning_factor: 2
-munin_load_critical_factor: 4
+munin_load_warning_factor: 6
+munin_load_critical_factor: 15
 
 # FreeBSD pkgng install options. Default to false to match pkgng's own
 # defaults; opt in per host (e.g. EOL/STABLE CI boxes) via host_vars.

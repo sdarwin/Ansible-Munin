@@ -33,18 +33,20 @@
   loop: "{{ query('varnames', '^default_') }}"
 
 # The load plugin reads differently-named env vars depending on platform:
-# macOS reads load_warn/load_crit, Linux reads load_warning/load_critical.
-# FreeBSD's load plugin hardcodes its thresholds and ignores env vars, so this
-# feature targets macOS and Linux only.
+# macOS and FreeBSD read load_warn/load_crit, Linux reads
+# load_warning/load_critical. FreeBSD requires the load plugin to honour the
+# env vars, which upstream gained via our PR (previously hardcoded 10/120).
+# For the CPU count, ansible_processor_vcpus is unset on FreeBSD, where
+# ansible_processor_count (sysctl hw.ncpu) is the logical CPU count instead.
 - name: Calculate CPU-derived thresholds for the load plugin
   ansible.builtin.set_fact:
-    munin_load_warning_value: "{{ ansible_processor_vcpus | default(1) | int * munin_load_warning_factor | int }}"
-    munin_load_critical_value: "{{ ansible_processor_vcpus | default(1) | int * munin_load_critical_factor | int }}"
+    munin_load_warning_value: "{{ (ansible_processor_vcpus | default(ansible_processor_count) | default(1) | int) * munin_load_warning_factor | int }}"
+    munin_load_critical_value: "{{ (ansible_processor_vcpus | default(ansible_processor_count) | default(1) | int) * munin_load_critical_factor | int }}"
   when:
     - munin_auto_load_thresholds | bool
     - munin_node_config['load'] is not defined
 
-- name: Set load plugin thresholds (macOS)
+- name: Set load plugin thresholds (macOS and FreeBSD)
   ansible.builtin.set_fact:
     munin_node_config: >-
       {{ munin_node_config | combine({'load': {
@@ -54,7 +56,7 @@
   when:
     - munin_auto_load_thresholds | bool
     - munin_node_config['load'] is not defined
-    - ansible_facts['system'] == 'Darwin'
+    - ansible_facts['system'] in ['Darwin', 'FreeBSD']
 
 - name: Set load plugin thresholds (Linux)
   ansible.builtin.set_fact:
